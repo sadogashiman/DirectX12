@@ -11,33 +11,37 @@
 //******************************
 //　　		include
 //******************************
-#include<Windows.h>
-#include<tchar.h>
-#include<math.h>
-#include<wrl/client.h>
-#include<mmsystem.h>
-#include<Shlwapi.h>
-#include<cassert>
+#include <Windows.h>
+#include <tchar.h>
+#include <math.h>
+#include <wrl/client.h>
+#include <mmsystem.h>
+#include <Shlwapi.h>
+#include <cassert>
+#include <shellapi.h>
+#include <wrl/wrappers/corewrappers.h>
 
 //DirectX
 #include <d3d12.h>
-#include <dxgi1_4.h>
+#include <dxgi1_6.h>
 #include <d3d12shader.h>
 #include <SimpleMath.h>
 #include <WICTextureLoader.h>
 #include <DDSTextureLoader.h>
 #include <dinput.h>
+#include <DirectXMath.h>
+#include "d3dx12.h"
 
 //std
-#include<fstream>
-#include<vector>
-#include<map>
-#include<chrono>
-#include<iostream>
-#include<random>
-#include<algorithm>
-#include<thread>
-#include<mutex>
+#include <fstream>
+#include <vector>
+#include <map>
+#include <chrono>
+#include <iostream>
+#include <random>
+#include <algorithm>
+#include <thread>
+#include <mutex>
 
 //******************************
 //　　		リンク
@@ -68,7 +72,7 @@ const int kExtensionTypeNum = 5;
 const float kScreen_depth = 1000.0F;
 const float kScreen_near = 0.1F;
 const bool kFullScreen = false;
-const bool kvsync = true;
+const bool kVsync = true;
 const bool kTgs = false; //TGSブース展示用ボタン配置
 
 //******************************

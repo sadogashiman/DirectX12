@@ -22,6 +22,15 @@
     <Filter Include="Input">
       <UniqueIdentifier>{b4fdbe98-dc8a-4ce9-a0fa-fc55245f2036}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DirectX">
+      <UniqueIdentifier>{f5fdd1c0-3cfd-4673-a32f-1458d0f9416d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Support">
+      <UniqueIdentifier>{1863b2f8-dbf1-4587-8785-c56e7c4375e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Support\MicrosoftHelper">
+      <UniqueIdentifier>{eef915ee-fc6f-43bc-98d6-e178635b90ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -38,6 +47,12 @@
     </ClCompile>
     <ClCompile Include="System.cpp">
       <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DxSupport.cpp">
+      <Filter>Support</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,6 +76,18 @@
     </ClInclude>
     <ClInclude Include="System.h">
       <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DxSupport.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>Support\MicrosoftHelper</Filter>
+    </ClInclude>
+    <ClInclude Include="DXHelper.h">
+      <Filter>Support\MicrosoftHelper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

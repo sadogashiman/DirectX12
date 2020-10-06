@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Direct3D.cpp" />
+    <ClCompile Include="DxSupport.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Singleton.cpp" />
@@ -28,6 +30,10 @@
     <ClCompile Include="System.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="Direct3D.h" />
+    <ClInclude Include="DXHelper.h" />
+    <ClInclude Include="DxSupport.h" />
     <ClInclude Include="error.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InputKeycode.h" />

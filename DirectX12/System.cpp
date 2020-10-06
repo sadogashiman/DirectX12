@@ -2,6 +2,7 @@
 #include "Input.h"
 #include "Singleton.h"
 #include "error.h"
+#include "Direct3D.h"
 
 System::System()
 {
@@ -19,7 +20,7 @@ bool System::init()
 
 	//Windowsを初期化
 	initWindows();
-	
+
 	//各クラスを初期化
 	result = Singleton<Input>::getPtr()->init();
 	if (!result)
@@ -28,7 +29,12 @@ bool System::init()
 		return false;
 	}
 
-
+	result = Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near);
+	if (!result)
+	{
+		Error::showDialog("Direct3Dクラスの初期化に失敗");
+		return false;
+	}
 
 
 
@@ -76,10 +82,12 @@ void System::destroy()
 
 bool System::update()
 {
-	//アプリケーションを終了
+	//更新
+	Singleton<Input>::getPtr()->update();
+
+	//アプリケーション終了
 	if (Singleton<Input>::getPtr()->quitApp())
 		return false;
-
 
 	return true;
 }
@@ -90,7 +98,6 @@ void System::initWindows()
 	DEVMODE demscreensettings;
 	ScreenData wnddata;
 	int x, y;
-	
 
 	//このオブジェクトへのポインタを作成
 	systemhandle = this;
@@ -99,7 +106,7 @@ void System::initWindows()
 	hinstance_ = GetModuleHandle(NULL);
 
 	//ウィンドウの設定
-	wc.style = CS_HREDRAW | CS_VREDRAW ;
+	wc.style = CS_HREDRAW | CS_VREDRAW;
 	wc.lpfnWndProc = WndProc;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;

@@ -4,27 +4,19 @@
 #include "Support.h"
 #include "Singleton.h"
 #include "System.h"
-
-Direct3D::Direct3D()
-{
-	ZeroMemory(this, sizeof(Direct3D));
-}
+#include "DXHelper.h"
 
 Direct3D::~Direct3D()
 {
 }
 
-bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
+void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
 {
 	bool result;
 
 	//パイプラインを作成
-	result = loadPipeline(ScreenWidth, ScreenHeight, Vsync, FullScreen, ScreenDepth, ScreenNear);
-	if (!result)
-	{
-		Error::showDialog("パイプラインの作成に失敗");
-		return false;
-	}
+	loadPipeline(ScreenWidth, ScreenHeight, Vsync, FullScreen, ScreenDepth, ScreenNear);
+
 
 	//ビューポートの設定
 	viewport_.Height = kWindow_Height;
@@ -41,28 +33,29 @@ bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 
 
 
-	return true;
 }
 
-bool Direct3D::render()
+void Direct3D::update()
 {
-	return true;
+}
+
+void Direct3D::render()
+{
 }
 
 void Direct3D::destroy()
 {
 }
 
-bool Direct3D::loadAssets(const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
+void Direct3D::loadAssets(const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
 {
 
 
 
 
-	return true;
 }
 
-bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear)
+void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear)
 {
 #ifdef _DEBUG
 	//デバッグ時のみデバッグレイヤーを有効化する
@@ -99,11 +92,8 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	//ファクトリを作成
 	ComPtr<IDXGIFactory4> factory;
 	hr = CreateDXGIFactory2(dxgidebugflag, IID_PPV_ARGS(&factory));
-	if (FAILED(hr))
-	{
-		Error::showDialog("IDXGIFactory4の作成に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
+
 
 	//GPUが複数個存在することを前提に初期化
 	if (kUseHardwareAdapter)
@@ -125,11 +115,8 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 				hardwareadapter.Get(),
 				D3D_FEATURE_LEVEL_12_0,
 				IID_PPV_ARGS(&device_));
-			if (FAILED(hr))
-			{
-				Error::showDialog("Direct3Dデバイスの作成に失敗");
-				return false;
-			}
+			ThrowIfFailed(hr);
+
 		}
 	}
 	else
@@ -137,11 +124,8 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 		ComPtr<IDXGIAdapter> warpadapter;
 		//アダプタの列挙
 		hr = factory->EnumWarpAdapter(IID_PPV_ARGS(&warpadapter));
-		if (FAILED(hr))
-		{
-			Error::showDialog("warpアダプタの列挙に失敗");
-			return false;
-		}
+		ThrowIfFailed(hr);
+
 
 		//warpアダプタを使用するときは機能レベルを下げておく
 		hr = D3D12CreateDevice(
@@ -149,11 +133,8 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 			D3D_FEATURE_LEVEL_11_0,
 			IID_PPV_ARGS(&device_)
 		);
-		if (FAILED(hr))
-		{
-			Error::showDialog("warpアダプタでのDirect3Dデバイスの作成に失敗");
-			return false;
-		}
+		ThrowIfFailed(hr);
+
 	}
 
 	//コマンドキューを初期化
@@ -167,11 +148,8 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 
 	//コマンドキューの作成
 	hr = device_->CreateCommandQueue(&commandqueuedesc, IID_PPV_ARGS(&cmdqueue_));
-	if (FAILED(hr))
-	{
-		Error::showDialog("コマンドキューの作成に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
+
 
 	//スワップチェインを初期化
 	ZeroMemory(&swapchaindesc, sizeof(swapchaindesc));
@@ -197,26 +175,17 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 		nullptr,
 		&swapchain
 	);
-	if (FAILED(hr))
-	{
-		Error::showDialog("スワップチェインの作成に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
+
 
 	//Alt+Enterを無効にする
 	hr = factory->MakeWindowAssociation(Singleton<System>::getPtr()->getWindowHandle(), DXGI_MWA_NO_ALT_ENTER);
-	if (FAILED(hr))
-	{
-		Error::showDialog("フルスクリーントランジションの設定に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
+
 
 	hr = swapchain.As(&swapchain_);
-	if (FAILED(hr))
-	{
-		Error::showDialog("スワップチェインの複製に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
+
 
 	//バックバッファの数を取得
 	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
@@ -230,11 +199,8 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	rtvheapdesc.NodeMask = 0;
 
 	hr = device_->CreateDescriptorHeap(&rtvheapdesc, IID_PPV_ARGS(&rendertargetviewheap_));
-	if (FAILED(hr))
-	{
-		Error::showDialog("rendertargetview Heapの作成に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
+
 
 	//サイズを取得
 	rendertargetdescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -246,11 +212,8 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	dsvheapdesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	dsvheapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	hr = device_->CreateDescriptorHeap(&dsvheapdesc, IID_PPV_ARGS(&depthstencilviewheap_));
-	if (FAILED(hr))
-	{
-		Error::showDialog("depthstencilview heapの作成に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
+
 
 	//サイズを取得
 	depthstencildescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
@@ -262,21 +225,15 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	for (UINT i = 0; i < kBufferCount; i++)
 	{
 		hr = swapchain_->GetBuffer(i, IID_PPV_ARGS(&rendertargets[i]));
-		if (FAILED(hr))
-		{
-			Error::showDialog("レンダーターゲットバッファの取得に失敗");
-			return false;
-		}
+		ThrowIfFailed(hr);
+
 
 		device_->CreateRenderTargetView(rendertargets[i].Get(), nullptr, rtvhandle);
 		rtvhandle.Offset(1, rendertargetdescriptionsize_);
 
 		hr = device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdallocator_[i]));
-		if (FAILED(hr))
-		{
-			Error::showDialog("コマンドアロケータの作成に失敗");
-			return false;
-		}
+		ThrowIfFailed(hr);
+
 	}
 
 	//デプスステンシルビューの設定
@@ -300,11 +257,7 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 		&depthoptimizedclearvalue,
 		IID_PPV_ARGS(&depthstencil_)
 	);
-	if (FAILED(hr))
-	{
-		Error::showDialog("CommittedResourceの作成に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
 
 	NAME_D3D12_OBJECT(depthstencil_);
 
@@ -321,11 +274,7 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 		nullptr,
 		IID_PPV_ARGS(&constantbuffer_)
 	);
-	if (FAILED(hr))
-	{
-		Error::showDialog("CommittedResourceの作成に失敗");
-		return false;
-	}
+	ThrowIfFailed(hr);
 
 	//コンスタントバッファビューの設定
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvdesc;
@@ -336,34 +285,17 @@ bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	//コンスタントバッファをマップして初期化
 	CD3DX12_RANGE readrange(0, 0);
 	hr = constantbuffer_->Map(0, &readrange, reinterpret_cast<void**>(&constantbufferviewbegin_));
-	if (FAILED(hr))
-	{
-		Error::showDialog("コンスタントバッファのマップに失敗");
-		return false;
-	}
-
-	return true;
+	ThrowIfFailed(hr);
 }
 
-bool Direct3D::populateCommandList()
+void Direct3D::populateCommandList()
 {
 	HRESULT hr;
 
 	//コマンドリストの初期化
 	//コマンドアロケータは関連付けされている場合のみ初期化可能
-	hr = cmdallocator_[frameindex_]->Reset();
-	if (FAILED(hr))
-	{
-		Error::showDialog("コマンドアロケータの初期化に失敗");
-		return false;
-	}
-
-	hr = cmdlist_->Reset(cmdallocator_[kBufferCount].Get(), pipelinestate_.Get());
-	if (FAILED(hr))
-	{
-		Error::showDialog("コマンドリストの初期化に失敗");
-		return false;
-	}
+	hr = cmdlist_->Reset(cmdallocator_[frameindex_].Get(), pipelinestate_.Get());
+	ThrowIfFailed(hr);
 
 	//コマンドリストに必用な情報をセット
 	cmdlist_->SetGraphicsRootSignature(rootsignature_.Get());
@@ -383,6 +315,22 @@ bool Direct3D::populateCommandList()
 
 	cmdlist_->SetGraphicsRootConstantBufferView(0, constantbuffer_->GetGPUVirtualAddress() + sizeof(ConstantBuffer) * frameindex_);
 
+	for (auto& mesh : model_)
+	{
+		cmdlist_->SetGraphicsRoot32BitConstant(1, mesh.IndexSize, 0);
+		cmdlist_->SetGraphicsRootShaderResourceView(2, mesh.VertexResources[0]->GetGPUVirtualAddress());
+		cmdlist_->SetGraphicsRootShaderResourceView(3, mesh.MeshletResource->GetGPUVirtualAddress());
+		cmdlist_->SetGraphicsRootShaderResourceView(4, mesh.UniqueVertexIndexResource->GetGPUVirtualAddress());
+		cmdlist_->SetGraphicsRootShaderResourceView(5, mesh.PrimitiveIndexResource->GetGPUVirtualAddress());
 
-	return true;
+		for (auto& Subset : mesh.MeshletSubsets)
+		{
+			cmdlist_->SetGraphicsRoot32BitConstant(1, Subset.Offset, 1);
+			cmdlist_->DispatchMesh(Subset.Count, 1, 1);
+		}
+	}
+
+	//バックバッファに描画(Present的な関数)
+	cmdlist_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(rendertargets[frameindex_].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	ThrowIfFailed(cmdlist_->Close());
 }

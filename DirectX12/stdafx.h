@@ -8,6 +8,8 @@
 #define D3DCOMPILE_DEBUG 1
 #endif // _DEBUG
 
+
+
 //******************************
 //　　		include
 //******************************
@@ -25,9 +27,6 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <d3d12shader.h>
-#include <SimpleMath.h>
-#include <WICTextureLoader.h>
-#include <DDSTextureLoader.h>
 #include <dinput.h>
 #include <DirectXMath.h>
 #include "d3dx12.h"
@@ -62,7 +61,6 @@
 //******************************
 using namespace Microsoft::WRL;
 using namespace DirectX;
-using namespace SimpleMath;
 
 //******************************
 //　　		  定数

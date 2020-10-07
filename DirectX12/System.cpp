@@ -1,8 +1,8 @@
 #include "System.h"
-#include "Input.h"
 #include "Singleton.h"
 #include "error.h"
 #include "Direct3D.h"
+#include "DirectXBase.h"
 
 System::System()
 {
@@ -21,20 +21,10 @@ bool System::init()
 	//Windowsを初期化
 	initWindows();
 
-	//各クラスを初期化
-	result = Singleton<Input>::getPtr()->init();
-	if (!result)
-	{
-		Error::showDialog("DirectInput 初期化エラー");
-		return false;
-	}
 
-	result = Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near,L"test_ms.hlsl",L"test_ps.hlsl");
-	if (!result)
-	{
-		Error::showDialog("Direct3Dクラスの初期化に失敗");
-		return false;
-	}
+	
+
+
 
 
 
@@ -82,12 +72,6 @@ void System::destroy()
 
 bool System::update()
 {
-	//更新
-	Singleton<Input>::getPtr()->update();
-
-	//アプリケーション終了
-	if (Singleton<Input>::getPtr()->quitApp())
-		return false;
 
 	return true;
 }
@@ -210,12 +194,10 @@ LRESULT CALLBACK System::MessageHandler(HWND hWnd, UINT uMessage, WPARAM wParam,
 	{
 	case WM_KEYDOWN:
 	{
-		Singleton<Input>::getPtr()->isKeyPressed((unsigned int)wParam);
 		return 0;
 	}
 	case WM_KEYUP:
 	{
-		Singleton<Input>::getPtr()->isKeyReleased((unsigned int)wParam);
 		return 0;
 	}
 	default:
@@ -230,11 +212,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMessage)
 	{
+	case WM_CREATE:
+	{
+		LPCREATESTRUCT createstruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(createstruct->lpCreateParams));
+	}
+	return 0;
 	case WM_DESTROY:
 	case WM_CLOSE:
 	{
 		PostQuitMessage(0);
 		return 0;
+	}
+	case WM_PAINT:
+	{
+		//beginpaint()などのwindowsの描画機能を呼ばないとWM_PAINTが呼ばれ続ける挙動を利用する
+
 	}
 	default:
 	{

@@ -31,6 +31,9 @@
     <Filter Include="Support\Microsoft">
       <UniqueIdentifier>{eef915ee-fc6f-43bc-98d6-e178635b90ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{cc6d23de-8a63-4f9b-bcee-9255afc9912d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -41,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>Input</Filter>
     </ClCompile>
     <ClCompile Include="System.cpp">
       <Filter>System</Filter>
@@ -56,6 +56,15 @@
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Support\Microsoft</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXBase.cpp">
+      <Filter>DirectX</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectInput.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -70,12 +79,6 @@
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>Input</Filter>
-    </ClInclude>
-    <ClInclude Include="InputKeycode.h">
-      <Filter>Input</Filter>
     </ClInclude>
     <ClInclude Include="System.h">
       <Filter>System</Filter>
@@ -97,6 +100,18 @@
     </ClInclude>
     <ClInclude Include="Span.h">
       <Filter>Support\Microsoft</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXBase.h">
+      <Filter>DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectInput.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="InputKeyCode.h">
+      <Filter>Input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

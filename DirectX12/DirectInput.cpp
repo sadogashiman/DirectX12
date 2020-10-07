@@ -1,17 +1,17 @@
 #include "stdafx.h"
-#include "Input.h"
+#include "DirectInput.h"
 #include "System.h"
 #include "Singleton.h"
 
-Input::Input()
+DirectInput::DirectInput()
 {
 }
 
-Input::~Input()
+DirectInput::~DirectInput()
 {
 }
 
-bool Input::init()
+bool DirectInput::init()
 {
 	HRESULT hr;
 
@@ -52,7 +52,7 @@ bool Input::init()
 	return true;
 }
 
-void Input::update()
+void DirectInput::update()
 {
 	//前フレームの情報として保存
 	padprevstate_ = padstate_;
@@ -65,7 +65,7 @@ void Input::update()
 	processInput();
 }
 
-void Input::destroy()
+void DirectInput::destroy()
 {
 	//破棄
 	//for (auto& controller : gamecontrollers_)
@@ -80,7 +80,7 @@ void Input::destroy()
 	keyboarddev_->Release();
 }
 
-BOOL Input::EnumGameControllers(LPCDIDEVICEINSTANCE Devinst)
+BOOL DirectInput::EnumGameControllers(LPCDIDEVICEINSTANCE Devinst)
 {
 	LPDIRECTINPUTDEVICE8 gamecontroller;
 
@@ -97,13 +97,13 @@ BOOL Input::EnumGameControllers(LPCDIDEVICEINSTANCE Devinst)
 	}
 }
 
-BOOL Input::staticEnumGameControllers(LPCDIDEVICEINSTANCE Devinst, LPVOID Pvref)
+BOOL DirectInput::staticEnumGameControllers(LPCDIDEVICEINSTANCE Devinst, LPVOID Pvref)
 {
-	Input* dinputinstance = (Input*)Pvref;
+	DirectInput* dinputinstance = (DirectInput*)Pvref;
 	return dinputinstance->EnumGameControllers(Devinst);
 }
 
-BOOL Input::staticSetGameControllerAxesRange(LPCDIDEVICEINSTANCE Devobjinst, LPVOID Pvref)
+BOOL DirectInput::staticSetGameControllerAxesRange(LPCDIDEVICEINSTANCE Devobjinst, LPVOID Pvref)
 {
 	//コントローラー
 	LPDIRECTINPUTDEVICE8 gamecontroller = (LPDIRECTINPUTDEVICE8)Pvref;
@@ -155,27 +155,27 @@ BOOL Input::staticSetGameControllerAxesRange(LPCDIDEVICEINSTANCE Devobjinst, LPV
 	return DIENUM_CONTINUE;
 }
 
-const bool Input::isKeyState(const unsigned int KeyCode) const
+const bool DirectInput::isKeyState(const unsigned int KeyCode) const
 {
 	return keystate_[KeyCode] & DINPUT_VERTION;
 }
 
-const bool Input::isKeyPressed(const unsigned int KeyCode) const
+const bool DirectInput::isKeyPressed(const unsigned int KeyCode) const
 {
 	return keystate_[KeyCode] & DINPUT_VERTION && !(keyprevstate_[KeyCode] & DINPUT_VERTION);
 }
 
-const bool Input::isKeyReleased(const unsigned int KeyCode) const
+const bool DirectInput::isKeyReleased(const unsigned int KeyCode) const
 {
 	return !(keystate_[KeyCode] & DINPUT_VERTION) && keyprevstate_[KeyCode] & DINPUT_VERTION;
 }
 
-const bool Input::isKeyHeld(const unsigned int KeyCode) const
+const bool DirectInput::isKeyHeld(const unsigned int KeyCode) const
 {
-	return keystate_[KeyCode] & DINPUT_VERTION&& keyprevstate_[KeyCode] & DINPUT_VERTION;
+	return keystate_[KeyCode] & DINPUT_VERTION && keyprevstate_[KeyCode] & DINPUT_VERTION;
 }
 
-const bool Input::anyKeyDown() const
+const bool DirectInput::anyKeyDown() const
 {
 	for (int i = 0; i < 256; i++)
 	{
@@ -186,7 +186,7 @@ const bool Input::anyKeyDown() const
 	return false;
 }
 
-const bool Input::anyKeyUp() const
+const bool DirectInput::anyKeyUp() const
 {
 	for (int i = 0; i < 256; i++)
 	{
@@ -197,7 +197,7 @@ const bool Input::anyKeyUp() const
 	return false;
 }
 
-const bool Input::anyKeyHeld() const
+const bool DirectInput::anyKeyHeld() const
 {
 	for (int i = 0; i < 256; i++)
 	{
@@ -208,27 +208,27 @@ const bool Input::anyKeyHeld() const
 	return false;
 }
 
-const bool Input::isBottonState(const unsigned int BottonCode) const
+const bool DirectInput::isBottonState(const unsigned int BottonCode) const
 {
 	return padstate_.rgbButtons[BottonCode] & DINPUT_VERTION;
 }
 
-const bool Input::isBottonPressed(const unsigned int BottonCode) const
+const bool DirectInput::isBottonPressed(const unsigned int BottonCode) const
 {
 	return padstate_.rgbButtons[BottonCode] & DINPUT_VERTION && !(padprevstate_.rgbButtons[BottonCode] & DINPUT_VERTION);
 }
 
-const bool Input::isBottonReleased(const unsigned int BottonCode) const
+const bool DirectInput::isBottonReleased(const unsigned int BottonCode) const
 {
 	return !(padstate_.rgbButtons[BottonCode] & DINPUT_VERTION) && padprevstate_.rgbButtons[BottonCode] & DINPUT_VERTION;
 }
 
-const bool Input::isBottonHeld(const unsigned int BottonCode) const
+const bool DirectInput::isBottonHeld(const unsigned int BottonCode) const
 {
 	return padstate_.rgbButtons[BottonCode] & DINPUT_VERTION && padprevstate_.rgbButtons[BottonCode] & DINPUT_VERTION;
 }
 
-const bool Input::anyBottomDown() const
+const bool DirectInput::anyBottomDown() const
 {
 	for (int i = 0; i < 32; i++)
 	{
@@ -239,7 +239,7 @@ const bool Input::anyBottomDown() const
 	return false;
 }
 
-const bool Input::anyBottomUp() const
+const bool DirectInput::anyBottomUp() const
 {
 	for (int i = 0; i < 32; i++)
 	{
@@ -250,7 +250,7 @@ const bool Input::anyBottomUp() const
 	return false;
 }
 
-const bool Input::anyBottonHeld() const
+const bool DirectInput::anyBottonHeld() const
 {
 	for (int i = 0; i < 32; i++)
 	{
@@ -261,27 +261,27 @@ const bool Input::anyBottonHeld() const
 	return false;
 }
 
-const bool Input::isPOVState(const unsigned int POVBottonCode) const
+const bool DirectInput::isPOVState(const unsigned int POVBottonCode) const
 {
 	return padstate_.rgdwPOV[0] == 9000 * POVBottonCode;
 }
 
-const bool Input::isPOVPressed(const unsigned int POVBottonCode) const
+const bool DirectInput::isPOVPressed(const unsigned int POVBottonCode) const
 {
 	return padstate_.rgdwPOV[0] == 9000 * POVBottonCode && padprevstate_.rgdwPOV[0] != 9000 * POVBottonCode;
 }
 
-const bool Input::isPOVReleased(const unsigned int POVBottonCode) const
+const bool DirectInput::isPOVReleased(const unsigned int POVBottonCode) const
 {
 	return padstate_.rgdwPOV[0] != 9000 * POVBottonCode && padprevstate_.rgdwPOV[0] == 9000 * POVBottonCode;
 }
 
-const bool Input::isPOVHeld(const unsigned int POVBottonCode) const
+const bool DirectInput::isPOVHeld(const unsigned int POVBottonCode) const
 {
 	return padstate_.rgdwPOV[0] == 9000 * POVBottonCode && padprevstate_.rgdwPOV[0] == 9000 * POVBottonCode;
 }
 
-const bool Input::anyPadPOVDown() const
+const bool DirectInput::anyPadPOVDown() const
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -292,7 +292,7 @@ const bool Input::anyPadPOVDown() const
 	return false;
 }
 
-const bool Input::anyPadPOVUp() const
+const bool DirectInput::anyPadPOVUp() const
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -303,7 +303,7 @@ const bool Input::anyPadPOVUp() const
 	return false;
 }
 
-const bool Input::anyPadPOVHeld() const
+const bool DirectInput::anyPadPOVHeld() const
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -314,7 +314,7 @@ const bool Input::anyPadPOVHeld() const
 	return false;
 }
 
-const bool Input::quitApp()
+const bool DirectInput::quitApp()
 {
 	if (kTgs)
 	{
@@ -334,19 +334,19 @@ const bool Input::quitApp()
 	return false;
 }
 
-void Input::readKeyBoard()
+void DirectInput::readKeyBoard()
 {
 	HRESULT hr;
 	hr = keyboarddev_->GetDeviceState(sizeof(keystate_), &keystate_);
 	recovery(keyboarddev_, hr);
 }
 
-void Input::readMouse()
+void DirectInput::readMouse()
 {
 	mousedevice_->GetDeviceState(sizeof(padstate_), &padstate_);
 }
 
-void Input::readControllers()
+void DirectInput::readControllers()
 {
 	//すべてのコントローラーデバイスを稼働状態に
 	for (auto controller : gamecontrollers_)
@@ -358,7 +358,7 @@ void Input::readControllers()
 	}
 }
 
-void Input::processInput()
+void DirectInput::processInput()
 {
 	mousex_ = mousesstate_.lX;
 	mousey_ = mousesstate_.lY;
@@ -377,7 +377,7 @@ void Input::processInput()
 		mousey_ = screen_.Height;
 }
 
-bool Input::initKeyboard()
+bool DirectInput::initKeyboard()
 {
 	//キーボードインターフェイスを初期化
 	if (FAILED(didev_->CreateDevice(GUID_SysKeyboard, &keyboarddev_, NULL)))
@@ -403,7 +403,7 @@ bool Input::initKeyboard()
 	return true;
 }
 
-bool Input::initMouse()
+bool DirectInput::initMouse()
 {
 	//デバイス作成
 	if (FAILED(didev_->CreateDevice(GUID_SysMouse, &mousedevice_, NULL)))
@@ -430,7 +430,7 @@ bool Input::initMouse()
 	return true;
 }
 
-bool Input::initControllers()
+bool DirectInput::initControllers()
 {
 	if (currentactivecontroller_ < 0 || currentactivecontroller_ >= gamecontrollers_.size())
 	{
@@ -462,7 +462,7 @@ bool Input::initControllers()
 	return true;
 }
 
-void Input::recovery(LPDIRECTINPUTDEVICE8& Dev, HRESULT Hr)
+void DirectInput::recovery(LPDIRECTINPUTDEVICE8& Dev, HRESULT Hr)
 {
 	//エラーがなくなるまでリカバリー
 	while (Hr == DIERR_INPUTLOST || Hr == DIERR_INVALIDPARAM || Hr == DIERR_NOTACQUIRED || Hr == DIERR_NOTINITIALIZED || Hr == E_PENDING)

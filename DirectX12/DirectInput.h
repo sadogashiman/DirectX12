@@ -6,11 +6,9 @@ struct ScreenSize
 	int Height;
 };
 
-class Input
+class DirectInput
 {
 private:
-
-
 	//入力情報読み取り
 	void readKeyBoard();
 	void readMouse();
@@ -24,7 +22,7 @@ private:
 	bool initControllers();
 
 	//エラーが起きた時に解消する
-	void recovery(LPDIRECTINPUTDEVICE8& Dev,HRESULT Hr);
+	void recovery(LPDIRECTINPUTDEVICE8& Dev, HRESULT Hr);
 
 	DIJOYSTATE padstate_;
 	DIJOYSTATE padprevstate_;
@@ -44,8 +42,8 @@ private:
 	ComPtr<IDirectInput8A> didev_;
 	unsigned int currentactivecontroller_;
 public:
-	Input();
-	~Input();
+	DirectInput();
+	~DirectInput();
 
 	bool init();
 	void update();
@@ -88,16 +86,16 @@ public:
 
 	//指定のボタンの入力状態を返す
 	const bool isBottonState(const unsigned int BottonCode)const;
-	
+
 	//指定のボタンの入力が開始されたかを返す
 	const bool isBottonPressed(const unsigned int BottonCode)const;
-	
+
 	//指定のボタンの入力が終了されたかを返す
 	const bool isBottonReleased(const unsigned int BottonCode)const;
 
 	//指定のボタンの入力が継続されているかを返す
 	const bool isBottonHeld(const unsigned int BottonCode)const;
-	
+
 	//何らかのボタンが入力されているかを返す
 	const bool anyBottomDown()const;
 
@@ -130,12 +128,5 @@ public:
 
 	//ゲーム終了キー
 	const bool quitApp();
-
-	static inline Input* getInstance()
-	{
-		static Input instance;
-		return &instance;
-	}
-
 };
 

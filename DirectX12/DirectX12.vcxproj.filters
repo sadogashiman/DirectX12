@@ -28,7 +28,7 @@
     <Filter Include="Support">
       <UniqueIdentifier>{1863b2f8-dbf1-4587-8785-c56e7c4375e3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Support\MicrosoftHelper">
+    <Filter Include="Support\Microsoft">
       <UniqueIdentifier>{eef915ee-fc6f-43bc-98d6-e178635b90ad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -51,8 +51,11 @@
     <ClCompile Include="Direct3D.cpp">
       <Filter>DirectX</Filter>
     </ClCompile>
-    <ClCompile Include="DxSupport.cpp">
+    <ClCompile Include="Support.cpp">
       <Filter>Support</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Support\Microsoft</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -80,14 +83,20 @@
     <ClInclude Include="Direct3D.h">
       <Filter>DirectX</Filter>
     </ClInclude>
-    <ClInclude Include="DxSupport.h">
-      <Filter>Support</Filter>
-    </ClInclude>
     <ClInclude Include="d3dx12.h">
-      <Filter>Support\MicrosoftHelper</Filter>
+      <Filter>Support\Microsoft</Filter>
     </ClInclude>
     <ClInclude Include="DXHelper.h">
-      <Filter>Support\MicrosoftHelper</Filter>
+      <Filter>Support\Microsoft</Filter>
+    </ClInclude>
+    <ClInclude Include="Support.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Support\Microsoft</Filter>
+    </ClInclude>
+    <ClInclude Include="Span.h">
+      <Filter>Support\Microsoft</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

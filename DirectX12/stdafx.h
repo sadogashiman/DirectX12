@@ -31,6 +31,7 @@
 #include <dinput.h>
 #include <DirectXMath.h>
 #include "d3dx12.h"
+#include <DirectXCollision.h>
 
 //std
 #include <fstream>
@@ -42,6 +43,9 @@
 #include <algorithm>
 #include <thread>
 #include <mutex>
+#include <string>
+#include <filesystem>
+#include <unordered_set>
 
 //******************************
 //　　		リンク
@@ -74,6 +78,7 @@ const float kScreen_near = 0.1F;
 const bool kFullScreen = false;
 const bool kVsync = true;
 const bool kTgs = false; //TGSブース展示用ボタン配置
+const std::string kResourceRootPath = "Resource/";
 
 //******************************
 //　　		  列挙体

@@ -29,7 +29,7 @@ bool System::init()
 		return false;
 	}
 
-	result = Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near);
+	result = Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near,L"test_ms.hlsl",L"test_ps.hlsl");
 	if (!result)
 	{
 		Error::showDialog("Direct3DƒNƒ‰ƒX‚Ì‰Šú‰»‚É¸”s");

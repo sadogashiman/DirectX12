@@ -1,10 +1,17 @@
 #pragma once
-class DxSupport
+enum AssetsMode
+{
+	kTexture,
+	kShaderFile,
+	kResource
+};
+class Support
 {
 private:
 
 public:
-	static void getAssetFullPath(LPCWSTR AssetName);
+	Support();
+	~Support();
 	static void getHardwareAdapter(_In_ IDXGIFactory1* Factory,_Outptr_opt_result_maybenull_ IDXGIAdapter1** Adapter, bool RequestHighPerformanceAdapter = false);
 	static void setCustomWindowText(LPCWSTR Text);
 	static void parseCommandLineArgs(_In_reads_(argc) WCHAR* args[], int argc);

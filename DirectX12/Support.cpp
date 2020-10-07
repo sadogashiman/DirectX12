@@ -1,15 +1,18 @@
-#include "stdafx.h"
-#include "DxSupport.h"
+#include "Support.h"
 
-void DxSupport::getAssetFullPath(LPCWSTR AssetName)
+Support::Support()
 {
 }
 
-_Use_decl_annotations_
-void DxSupport::getHardwareAdapter(IDXGIFactory1* Factory, IDXGIAdapter1** Adapter, bool RequestHighPerformanceAdapter)
+Support::~Support()
 {
-	*Adapter = nullptr;
+}
 
+
+
+_Use_decl_annotations_
+void Support::getHardwareAdapter(IDXGIFactory1* Factory, IDXGIAdapter1** Adapter, bool RequestHighPerformanceAdapter)
+{
 	ComPtr<IDXGIAdapter1> adapter;
 
 	ComPtr<IDXGIFactory6> factory6;
@@ -62,10 +65,10 @@ void DxSupport::getHardwareAdapter(IDXGIFactory1* Factory, IDXGIAdapter1** Adapt
 	*Adapter = adapter.Detach();
 }
 
-void DxSupport::setCustomWindowText(LPCWSTR Text)
+void Support::setCustomWindowText(LPCWSTR Text)
 {
 }
 
-void DxSupport::parseCommandLineArgs(WCHAR* args[], int argc)
+void Support::parseCommandLineArgs(WCHAR* args[], int argc)
 {
 }

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Direct3D.h"
 #include "error.h"
-#include "DxSupport.h"
+#include "Support.h"
 #include "Singleton.h"
 #include "System.h"
 
@@ -14,7 +14,55 @@ Direct3D::~Direct3D()
 {
 }
 
-bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear)
+bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
+{
+	bool result;
+
+	//パイプラインを作成
+	result = loadPipeline(ScreenWidth, ScreenHeight, Vsync, FullScreen, ScreenDepth, ScreenNear);
+	if (!result)
+	{
+		Error::showDialog("パイプラインの作成に失敗");
+		return false;
+	}
+
+	//ビューポートの設定
+	viewport_.Height = kWindow_Height;
+	viewport_.Width = kWindow_Width;
+	viewport_.MaxDepth = kScreen_depth;
+	viewport_.MinDepth = 0.0F;
+	viewport_.TopLeftX = 0.0F;
+	viewport_.TopLeftY = 0.0F;
+
+	scissorrect_.top = 0;
+	scissorrect_.left = 0;
+	scissorrect_.right = static_cast<LONG>(kWindow_Width);
+	scissorrect_.bottom = static_cast<LONG>(kWindow_Height);
+
+
+
+	return true;
+}
+
+bool Direct3D::render()
+{
+	return true;
+}
+
+void Direct3D::destroy()
+{
+}
+
+bool Direct3D::loadAssets(const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
+{
+
+
+
+
+	return true;
+}
+
+bool Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear)
 {
 #ifdef _DEBUG
 	//デバッグ時のみデバッグレイヤーを有効化する
@@ -35,8 +83,7 @@ bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	HRESULT hr;
 	D3D12_COMMAND_QUEUE_DESC commandqueuedesc;
 	DXGI_SWAP_CHAIN_DESC1 swapchaindesc;
-	unsigned int rendertargetdescriptionsize;
-	unsigned int depthstencildescriptionsize;
+
 
 	//機能レベルの設定
 	featurelevel = D3D_FEATURE_LEVEL_12_1;
@@ -62,7 +109,7 @@ bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	if (kUseHardwareAdapter)
 	{
 		ComPtr<IDXGIAdapter1> hardwareadapter;
-		DxSupport::getHardwareAdapter(factory.Get(), &hardwareadapter);
+		Support::getHardwareAdapter(factory.Get(), &hardwareadapter);
 
 		//Direct3Dデバイスを作成
 		hr = D3D12CreateDevice(
@@ -190,7 +237,7 @@ bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	}
 
 	//サイズを取得
-	rendertargetdescriptionsize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	rendertargetdescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	//descriptor heapの設定(DSV)
 	D3D12_DESCRIPTOR_HEAP_DESC dsvheapdesc;
@@ -206,7 +253,7 @@ bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	}
 
 	//サイズを取得
-	depthstencildescriptionsize = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	depthstencildescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 	//フレームリソースを作成
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvhandle(rendertargetviewheap_->GetCPUDescriptorHandleForHeapStart());
@@ -214,10 +261,20 @@ bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	//フレームごとにコマンドアロケータとレンダーターゲットっビューを作成
 	for (UINT i = 0; i < kBufferCount; i++)
 	{
-		hr = swapchain_->GetBuffer(i, IID_PPV_ARGS(&backbufferrendertarget_[i]));
+		hr = swapchain_->GetBuffer(i, IID_PPV_ARGS(&rendertargets[i]));
 		if (FAILED(hr))
 		{
-			Error::showDialog("コマンドアロケーターの作成に失敗");
+			Error::showDialog("レンダーターゲットバッファの取得に失敗");
+			return false;
+		}
+
+		device_->CreateRenderTargetView(rendertargets[i].Get(), nullptr, rtvhandle);
+		rtvhandle.Offset(1, rendertargetdescriptionsize_);
+
+		hr = device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdallocator_[i]));
+		if (FAILED(hr))
+		{
+			Error::showDialog("コマンドアロケータの作成に失敗");
 			return false;
 		}
 	}
@@ -288,11 +345,44 @@ bool Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	return true;
 }
 
-bool Direct3D::render()
+bool Direct3D::populateCommandList()
 {
-	return true;
-}
+	HRESULT hr;
 
-void Direct3D::destroy()
-{
+	//コマンドリストの初期化
+	//コマンドアロケータは関連付けされている場合のみ初期化可能
+	hr = cmdallocator_[frameindex_]->Reset();
+	if (FAILED(hr))
+	{
+		Error::showDialog("コマンドアロケータの初期化に失敗");
+		return false;
+	}
+
+	hr = cmdlist_->Reset(cmdallocator_[kBufferCount].Get(), pipelinestate_.Get());
+	if (FAILED(hr))
+	{
+		Error::showDialog("コマンドリストの初期化に失敗");
+		return false;
+	}
+
+	//コマンドリストに必用な情報をセット
+	cmdlist_->SetGraphicsRootSignature(rootsignature_.Get());
+	cmdlist_->RSSetViewports(1, &viewport_);
+	cmdlist_->RSSetScissorRects(1, &scissorrect_);
+
+	//バックバッファをレンダーターゲットに設定
+	cmdlist_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(rendertargets[frameindex_].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvhandle(rendertargetviewheap_->GetCPUDescriptorHandleForHeapStart(), frameindex_, rendertargetdescriptionsize_);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvhandle(depthstencilviewheap_->GetCPUDescriptorHandleForHeapStart());
+
+	//コマンドを記録
+	const float clearcolor[] {0.0F, 0.0F, 0.0F, 0.0F};
+	cmdlist_->ClearRenderTargetView(rtvhandle, clearcolor, 0, nullptr);
+	cmdlist_->ClearDepthStencilView(dsvhandle, D3D12_CLEAR_FLAG_DEPTH, 1.0F, 0, 0, nullptr);
+
+	cmdlist_->SetGraphicsRootConstantBufferView(0, constantbuffer_->GetGPUVirtualAddress() + sizeof(ConstantBuffer) * frameindex_);
+
+
+	return true;
 }

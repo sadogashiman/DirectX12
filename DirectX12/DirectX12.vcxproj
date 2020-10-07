@@ -20,7 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Direct3D.cpp" />
-    <ClCompile Include="DxSupport.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Support.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Singleton.cpp" />
@@ -33,7 +34,9 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Direct3D.h" />
     <ClInclude Include="DXHelper.h" />
-    <ClInclude Include="DxSupport.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="Span.h" />
+    <ClInclude Include="Support.h" />
     <ClInclude Include="error.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="InputKeycode.h" />

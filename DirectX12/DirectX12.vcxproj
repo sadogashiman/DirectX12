@@ -22,7 +22,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D.cpp" />
     <ClCompile Include="DirectInput.cpp" />
-    <ClCompile Include="DirectXBase.cpp" />
+    <ClCompile Include="LuaSystem.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Support.cpp" />
     <ClCompile Include="main.cpp" />
@@ -37,9 +37,9 @@
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Direct3D.h" />
     <ClInclude Include="DirectInput.h" />
-    <ClInclude Include="DirectXBase.h" />
     <ClInclude Include="DXHelper.h" />
     <ClInclude Include="InputKeyCode.h" />
+    <ClInclude Include="LuaSystem.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Span.h" />
     <ClInclude Include="Support.h" />
@@ -125,10 +125,12 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>C:\Users\Game\source\repos\DirectX12\DirectX12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\Game\source\repos\DirectX12\DirectX12\lua;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

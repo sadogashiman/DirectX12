@@ -6,14 +6,16 @@
 #include "System.h"
 #include "DXHelper.h"
 
+Direct3D::Direct3D()
+{
+}
+
 Direct3D::~Direct3D()
 {
 }
 
 void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
 {
-	bool result;
-
 	//パイプラインを作成
 	loadPipeline(ScreenWidth, ScreenHeight, Vsync, FullScreen, ScreenDepth, ScreenNear);
 
@@ -41,10 +43,27 @@ void Direct3D::update()
 
 void Direct3D::render()
 {
+	HRESULT hr;
+	//シーンをレンダリングするために必要なコマンドをコマンドリストに記録
+	populateCommandList();
+
+	//コマンドリスト実行
+	ID3D12CommandList* commandlists[] = { cmdlist_.Get() };
+	cmdqueue_->ExecuteCommandLists(_countof(commandlists), commandlists);
+
+	//present
+	hr = swapchain_->Present(1, 0);
+	ThrowIfFailed(hr);
+
+	moveToNextFrame();
 }
 
 void Direct3D::destroy()
 {
+	//GPUで実行待ちのリソースがないか確認(デストラクタでクリーンアップクリーンアップ)
+	waitForGPU();
+
+	CloseHandle(fenceevent_);
 }
 
 void Direct3D::loadAssets(const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
@@ -116,7 +135,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 				D3D_FEATURE_LEVEL_12_0,
 				IID_PPV_ARGS(&device_));
 			ThrowIfFailed(hr);
-
 		}
 	}
 	else
@@ -126,7 +144,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 		hr = factory->EnumWarpAdapter(IID_PPV_ARGS(&warpadapter));
 		ThrowIfFailed(hr);
 
-
 		//warpアダプタを使用するときは機能レベルを下げておく
 		hr = D3D12CreateDevice(
 			warpadapter.Get(),
@@ -134,7 +151,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 			IID_PPV_ARGS(&device_)
 		);
 		ThrowIfFailed(hr);
-
 	}
 
 	//コマンドキューを初期化
@@ -149,7 +165,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	//コマンドキューの作成
 	hr = device_->CreateCommandQueue(&commandqueuedesc, IID_PPV_ARGS(&cmdqueue_));
 	ThrowIfFailed(hr);
-
 
 	//スワップチェインを初期化
 	ZeroMemory(&swapchaindesc, sizeof(swapchaindesc));
@@ -182,10 +197,8 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	hr = factory->MakeWindowAssociation(Singleton<System>::getPtr()->getWindowHandle(), DXGI_MWA_NO_ALT_ENTER);
 	ThrowIfFailed(hr);
 
-
 	hr = swapchain.As(&swapchain_);
 	ThrowIfFailed(hr);
-
 
 	//バックバッファの数を取得
 	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
@@ -201,7 +214,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	hr = device_->CreateDescriptorHeap(&rtvheapdesc, IID_PPV_ARGS(&rendertargetviewheap_));
 	ThrowIfFailed(hr);
 
-
 	//サイズを取得
 	rendertargetdescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
@@ -213,7 +225,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	dsvheapdesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 	hr = device_->CreateDescriptorHeap(&dsvheapdesc, IID_PPV_ARGS(&depthstencilviewheap_));
 	ThrowIfFailed(hr);
-
 
 	//サイズを取得
 	depthstencildescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
@@ -233,7 +244,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 
 		hr = device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdallocator_[i]));
 		ThrowIfFailed(hr);
-
 	}
 
 	//デプスステンシルビューの設定
@@ -333,4 +343,38 @@ void Direct3D::populateCommandList()
 	//バックバッファに描画(Present的な関数)
 	cmdlist_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(rendertargets[frameindex_].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 	ThrowIfFailed(cmdlist_->Close());
+}
+
+void Direct3D::waitForGPU()
+{
+	HRESULT hr;
+	hr = cmdqueue_->Signal(fence_.Get(), fencevalue_[frameindex_]);
+	ThrowIfFailed(hr);
+
+	//フェンスの処理がされるまで待機
+	hr = fence_->SetEventOnCompletion(fencevalue_[frameindex_], fenceevent_);
+	ThrowIfFailed(hr);
+	WaitForSingleObjectEx(fenceevent_, INFINITE, FALSE);
+
+	//現在のフレームのフェンスの値をインクリメント
+	fencevalue_[frameindex_]++;
+}
+
+void Direct3D::moveToNextFrame()
+{
+	const UINT64 currentfencevalue = fencevalue_[frameindex_];
+	ThrowIfFailed(cmdqueue_->Signal(fence_.Get(), currentfencevalue));
+
+	//フレームインデックスを更新
+	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
+
+	//
+	if (fence_->GetCompletedValue() < fencevalue_[frameindex_])
+	{
+		ThrowIfFailed(fence_->SetEventOnCompletion(fencevalue_[frameindex_], fenceevent_));
+		WaitForSingleObjectEx(fenceevent_, INFINITE, FALSE);
+	}
+
+	//フェンスの値を次のフレームへ
+	fencevalue_[frameindex_] = currentfencevalue + 1;
 }

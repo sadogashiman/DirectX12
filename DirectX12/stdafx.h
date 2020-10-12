@@ -13,6 +13,7 @@
 //******************************
 //Å@Å@		include
 //******************************
+//WindowsAPI
 #include <Windows.h>
 #include <tchar.h>
 #include <math.h>
@@ -23,7 +24,7 @@
 #include <shellapi.h>
 #include <wrl/wrappers/corewrappers.h>
 
-//DirectX
+//DirectXä÷åW
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <d3d12shader.h>
@@ -32,7 +33,11 @@
 #include "d3dx12.h"
 #include <DirectXCollision.h>
 
-//std
+//Luaä÷åW
+#include <lua.hpp>
+
+
+//stdä÷åW
 #include <fstream>
 #include <vector>
 #include <map>
@@ -55,6 +60,7 @@
 #pragma comment(lib,"d3dcompiler.lib")
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"shlwapi.lib")
+#pragma comment(lib,"lua.lib")
 
 //******************************
 //Å@Å@		ñºëOãÛä‘

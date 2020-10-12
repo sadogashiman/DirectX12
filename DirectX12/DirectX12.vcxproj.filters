@@ -34,6 +34,12 @@
     <Filter Include="Camera">
       <UniqueIdentifier>{cc6d23de-8a63-4f9b-bcee-9255afc9912d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DirectX\Direct3D">
+      <UniqueIdentifier>{0f9d78ce-00e8-4abf-81a8-97d8778914cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lua">
+      <UniqueIdentifier>{546520e1-a397-4c57-9e45-588c9b435150}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,23 +54,23 @@
     <ClCompile Include="System.cpp">
       <Filter>System</Filter>
     </ClCompile>
-    <ClCompile Include="Direct3D.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="Support.cpp">
       <Filter>Support</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>Support\Microsoft</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXBase.cpp">
-      <Filter>DirectX</Filter>
-    </ClCompile>
     <ClCompile Include="DirectInput.cpp">
       <Filter>Input</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
       <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Direct3D.cpp">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClCompile>
+    <ClCompile Include="LuaSystem.cpp">
+      <Filter>Lua</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,9 +89,6 @@
     <ClInclude Include="System.h">
       <Filter>System</Filter>
     </ClInclude>
-    <ClInclude Include="Direct3D.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="d3dx12.h">
       <Filter>Support\Microsoft</Filter>
     </ClInclude>
@@ -101,9 +104,6 @@
     <ClInclude Include="Span.h">
       <Filter>Support\Microsoft</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXBase.h">
-      <Filter>DirectX</Filter>
-    </ClInclude>
     <ClInclude Include="DirectInput.h">
       <Filter>Input</Filter>
     </ClInclude>
@@ -112,6 +112,12 @@
     </ClInclude>
     <ClInclude Include="InputKeyCode.h">
       <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Direct3D.h">
+      <Filter>DirectX\Direct3D</Filter>
+    </ClInclude>
+    <ClInclude Include="LuaSystem.h">
+      <Filter>Lua</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

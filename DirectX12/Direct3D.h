@@ -53,6 +53,8 @@ private:
 	void loadAssets(const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName);
 	void loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear);
 	void populateCommandList();
+	void waitForGPU();
+	void moveToNextFrame();
 public:
 	Direct3D();
 	~Direct3D();

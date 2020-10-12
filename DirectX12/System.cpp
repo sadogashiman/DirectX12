@@ -2,7 +2,7 @@
 #include "Singleton.h"
 #include "error.h"
 #include "Direct3D.h"
-#include "DirectXBase.h"
+#include "DirectInput.h"
 
 System::System()
 {
@@ -21,8 +21,14 @@ bool System::init()
 	//Windows‚ğ‰Šú‰»
 	initWindows();
 
+	Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near, L"test",L"test");
 
-	
+	result = Singleton<DirectInput>::getPtr()->init();
+	if (!result)
+	{
+		Error::showDialog("DirectInput‚Ì‰Šú‰»‚É¸”s");
+		return false;
+	}
 
 
 
@@ -51,7 +57,7 @@ void System::run()
 			DispatchMessage(&msg);
 		}
 
-		if (msg.message == WM_QUIT)
+		if (msg.message == WM_QUIT||Singleton<DirectInput>::getPtr()->isKeyPressed(DIK_ESCAPE))
 		{
 			done = true;
 		}
@@ -194,10 +200,12 @@ LRESULT CALLBACK System::MessageHandler(HWND hWnd, UINT uMessage, WPARAM wParam,
 	{
 	case WM_KEYDOWN:
 	{
+		Singleton<DirectInput>::getPtr()->isKeyState(static_cast<unsigned int>(wParam));
 		return 0;
 	}
 	case WM_KEYUP:
 	{
+		Singleton<DirectInput>::getPtr()->isKeyState(static_cast<unsigned int>(wParam));
 		return 0;
 	}
 	default:
@@ -227,6 +235,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 	case WM_PAINT:
 	{
 		//beginpaint()‚È‚Ç‚Ìwindows‚Ì•`‰æ‹@”\‚ğŒÄ‚Î‚È‚¢‚ÆWM_PAINT‚ªŒÄ‚Î‚ê‘±‚¯‚é‹““®‚ğ—˜—p‚·‚é
+		Singleton<Direct3D>::getPtr()->update();
+		Singleton<Direct3D>::getPtr()->render();
 
 	}
 	default:

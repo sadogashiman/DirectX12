@@ -3,6 +3,8 @@
 #include "error.h"
 #include "Direct3D.h"
 #include "DirectInput.h"
+#include "DXHelper.h"
+#include "Polygon.h"
 
 System::System()
 {
@@ -21,7 +23,6 @@ bool System::init()
 	//Windowsを初期化
 	initWindows();
 
-	Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near, L"test",L"test");
 
 	result = Singleton<DirectInput>::getPtr()->init();
 	if (!result)
@@ -30,7 +31,7 @@ bool System::init()
 		return false;
 	}
 
-
+	
 
 
 
@@ -88,6 +89,36 @@ void System::initWindows()
 	DEVMODE demscreensettings;
 	ScreenData wnddata;
 	int x, y;
+
+	//LuaStateを取得
+	lua_State* initlua = luaL_newstate();
+	luaL_openlibs(initlua);
+
+	//Lua内の初期化関数を呼ぶ
+	if (luaL_dofile(initlua, "InitWindow.lua"))
+	{
+		Error::showDialog(lua_tostring(initlua, -1));
+	}
+
+	//関数を指定
+	lua_getglobal(initlua, "init");
+	
+	//テーブルをスタックに積む
+	lua_pcall(initlua, 0, 2, 0); 
+
+	//テーブルからパラメーターを取得
+	lua_getfield(initlua, 1, "width");
+	lua_getfield(initlua, 1, "height");
+
+	//テーブルから取得したデータを反映
+	if (lua_type(initlua, 2) == LUA_TNUMBER)
+		wnddata.height = (unsigned int)lua_tonumber(initlua, 2);
+	if (lua_type(initlua, 3) == LUA_TNUMBER)
+		wnddata.width = (unsigned int)lua_tonumber(initlua, 3);
+
+	//LuaStateを破棄
+	lua_close(initlua);
+
 
 	//このオブジェクトへのポインタを作成
 	systemhandle = this;
@@ -157,6 +188,8 @@ void System::initWindows()
 		hinstance_,
 		NULL
 	);
+	Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near, L"test", L"test");
+
 
 	//ウィンドウにフォーカスをセット
 	ShowWindow(hwnd_, SW_SHOW);

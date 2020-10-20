@@ -8,6 +8,68 @@ Support::~Support()
 {
 }
 
+HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring Profile, ComPtr<ID3DBlob>& ShaderBlob, ComPtr<ID3DBlob>& ErrorMessage)
+{
+	HRESULT hr;
+
+	//パスが有効か確認
+	if (!std::filesystem::exists(ShaderPath))
+	{
+		//拡張子をhlslに変換して再度パスを確認
+		ShaderPath.replace_extension("hlsl");
+		if (std::filesystem::exists(ShaderPath))
+		{
+			return E_FAIL;
+		}
+	}
+
+	//ファイル展開
+	std::ifstream in(ShaderPath, std::ios::binary);
+	if (!in.is_open())
+	{
+		return E_FAIL;
+	}
+
+	std::vector<char> data;
+
+	//配列サイズ変更
+	data.resize(in.seekg(0, in.end).tellg());
+
+	//ポインタを最初に戻してデータを取得
+	in.seekg(0, in.beg).read(data.data(), data.size());
+
+	//DXCによるコンパイル
+	ComPtr<IDxcLibrary> library;
+	ComPtr<IDxcCompiler> compiler;
+	ComPtr<IDxcBlobEncoding> source;
+	ComPtr<IDxcOperationResult> dxcresult;
+
+	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
+	library->CreateBlobWithEncodingFromPinned(data.data(), UINT32(data.size()), CP_ACP, &source);
+	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
+	LPCWSTR compileflag[] = {
+#ifdef _DEBUG
+			L"/Zi"
+#else
+			"L/02" //リリースビルド時は最適化
+#endif // _DEBUG
+	};
+
+	compiler->Compile(source.Get(), ShaderPath.wstring().c_str(), L"main", Profile.c_str(), compileflag, _countof(compileflag), nullptr, 0, nullptr, &dxcresult);
+
+	dxcresult->GetStatus(&hr);
+	if (SUCCEEDED(hr))
+	{
+		dxcresult->GetResult(reinterpret_cast<IDxcBlob**>(ShaderBlob.GetAddressOf()));
+	}
+	else
+	{
+		dxcresult->GetErrorBuffer(reinterpret_cast<IDxcBlobEncoding**>(ErrorMessage.GetAddressOf()));
+	}
+
+	return hr;
+}
+
 
 
 _Use_decl_annotations_
@@ -63,12 +125,4 @@ void Support::getHardwareAdapter(IDXGIFactory1* Factory, IDXGIAdapter1** Adapter
 	}
 
 	*Adapter = adapter.Detach();
-}
-
-void Support::setCustomWindowText(LPCWSTR Text)
-{
-}
-
-void Support::parseCommandLineArgs(WCHAR* args[], int argc)
-{
 }

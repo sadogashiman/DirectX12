@@ -37,8 +37,14 @@
     <Filter Include="DirectX\Direct3D">
       <UniqueIdentifier>{0f9d78ce-00e8-4abf-81a8-97d8778914cd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Lua">
+    <Filter Include="リソース ファイル\Lua">
       <UniqueIdentifier>{546520e1-a397-4c57-9e45-588c9b435150}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\HLSL">
+      <UniqueIdentifier>{831a0800-176e-4906-ae21-634a2a85ea9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="リソース ファイル\HLSL\Color">
+      <UniqueIdentifier>{c83d05ce-43a5-472c-830d-2ba9863f9bc5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -69,8 +75,8 @@
     <ClCompile Include="Direct3D.cpp">
       <Filter>DirectX\Direct3D</Filter>
     </ClCompile>
-    <ClCompile Include="LuaSystem.cpp">
-      <Filter>Lua</Filter>
+    <ClCompile Include="Polygon.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -116,11 +122,28 @@
     <ClInclude Include="Direct3D.h">
       <Filter>DirectX\Direct3D</Filter>
     </ClInclude>
-    <ClInclude Include="LuaSystem.h">
-      <Filter>Lua</Filter>
+    <ClInclude Include="lua_Helper.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Polygon.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="InitWindow.lua">
+      <Filter>リソース ファイル\Lua</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="color_vs.hlsl">
+      <Filter>リソース ファイル\HLSL\Color</Filter>
+    </FxCompile>
+    <FxCompile Include="color_ps.hlsl">
+      <Filter>リソース ファイル\HLSL\Color</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

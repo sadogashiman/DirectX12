@@ -44,8 +44,6 @@ void Direct3D::update()
 void Direct3D::render()
 {
 	HRESULT hr;
-	//シーンをレンダリングするために必要なコマンドをコマンドリストに記録
-	populateCommandList();
 
 	//コマンドリスト実行
 	ID3D12CommandList* commandlists[] = { cmdlist_.Get() };
@@ -66,14 +64,6 @@ void Direct3D::destroy()
 	CloseHandle(fenceevent_);
 }
 
-void Direct3D::loadAssets(const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
-{
-
-
-
-
-}
-
 void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear)
 {
 #ifdef _DEBUG
@@ -89,6 +79,11 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 		//追加のデバッグレイヤーを有効にする
 		dxgidebugflag |= DXGI_CREATE_FACTORY_DEBUG;
 	}
+
+	//GBVの有効化
+	ComPtr<ID3D12Debug3>gbvdebug;
+	debugcontroller.As(&gbvdebug);
+	gbvdebug->SetEnableGPUBasedValidation(true);
 #endif // _DEBUG
 
 	D3D_FEATURE_LEVEL featurelevel;
@@ -238,7 +233,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 		hr = swapchain_->GetBuffer(i, IID_PPV_ARGS(&rendertargets[i]));
 		ThrowIfFailed(hr);
 
-
 		device_->CreateRenderTargetView(rendertargets[i].Get(), nullptr, rtvhandle);
 		rtvhandle.Offset(1, rendertargetdescriptionsize_);
 
@@ -295,54 +289,26 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	//コンスタントバッファをマップして初期化
 	CD3DX12_RANGE readrange(0, 0);
 	hr = constantbuffer_->Map(0, &readrange, reinterpret_cast<void**>(&constantbufferviewbegin_));
-	ThrowIfFailed(hr);
-}
-
-void Direct3D::populateCommandList()
-{
-	HRESULT hr;
-
-	//コマンドリストの初期化
-	//コマンドアロケータは関連付けされている場合のみ初期化可能
-	hr = cmdlist_->Reset(cmdallocator_[frameindex_].Get(), pipelinestate_.Get());
-	ThrowIfFailed(hr);
-
-	//コマンドリストに必用な情報をセット
-	cmdlist_->SetGraphicsRootSignature(rootsignature_.Get());
-	cmdlist_->RSSetViewports(1, &viewport_);
-	cmdlist_->RSSetScissorRects(1, &scissorrect_);
-
-	//バックバッファをレンダーターゲットに設定
-	cmdlist_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(rendertargets[frameindex_].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvhandle(rendertargetviewheap_->GetCPUDescriptorHandleForHeapStart(), frameindex_, rendertargetdescriptionsize_);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvhandle(depthstencilviewheap_->GetCPUDescriptorHandleForHeapStart());
-
-	//コマンドを記録
-	const float clearcolor[] {0.0F, 0.0F, 0.0F, 0.0F};
-	cmdlist_->ClearRenderTargetView(rtvhandle, clearcolor, 0, nullptr);
-	cmdlist_->ClearDepthStencilView(dsvhandle, D3D12_CLEAR_FLAG_DEPTH, 1.0F, 0, 0, nullptr);
-
-	cmdlist_->SetGraphicsRootConstantBufferView(0, constantbuffer_->GetGPUVirtualAddress() + sizeof(ConstantBuffer) * frameindex_);
-
-	for (auto& mesh : model_)
+	if (FAILED(hr))
 	{
-		cmdlist_->SetGraphicsRoot32BitConstant(1, mesh.IndexSize, 0);
-		cmdlist_->SetGraphicsRootShaderResourceView(2, mesh.VertexResources[0]->GetGPUVirtualAddress());
-		cmdlist_->SetGraphicsRootShaderResourceView(3, mesh.MeshletResource->GetGPUVirtualAddress());
-		cmdlist_->SetGraphicsRootShaderResourceView(4, mesh.UniqueVertexIndexResource->GetGPUVirtualAddress());
-		cmdlist_->SetGraphicsRootShaderResourceView(5, mesh.PrimitiveIndexResource->GetGPUVirtualAddress());
-
-		for (auto& Subset : mesh.MeshletSubsets)
-		{
-			cmdlist_->SetGraphicsRoot32BitConstant(1, Subset.Offset, 1);
-			cmdlist_->DispatchMesh(Subset.Count, 1, 1);
-		}
+		ThrowIfFailed(hr);
 	}
 
-	//バックバッファに描画(Present的な関数)
-	cmdlist_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(rendertargets[frameindex_].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-	ThrowIfFailed(cmdlist_->Close());
+	//コマンドリストの初期化
+	hr = device_->CreateCommandList(
+		0, 
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		cmdallocator_[frameindex_].Get(),
+		nullptr,
+		IID_PPV_ARGS(&cmdlist_)
+	);
+	if (FAILED(hr))
+	{
+		ThrowIfFailed(hr);
+	}
+
+	cmdlist_->Close();
+
 }
 
 void Direct3D::waitForGPU()
@@ -368,7 +334,6 @@ void Direct3D::moveToNextFrame()
 	//フレームインデックスを更新
 	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
 
-	//
 	if (fence_->GetCompletedValue() < fencevalue_[frameindex_])
 	{
 		ThrowIfFailed(fence_->SetEventOnCompletion(fencevalue_[frameindex_], fenceevent_));

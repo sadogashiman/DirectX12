@@ -50,9 +50,7 @@ private:
 
 	Model model_;
 
-	void loadAssets(const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName);
 	void loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear);
-	void populateCommandList();
 	void waitForGPU();
 	void moveToNextFrame();
 public:
@@ -63,6 +61,10 @@ public:
 	void render();
 	void destroy();
 
+	//•`‰æŒn
+	inline void present(UINT SystemInterval, UINT Flag) { swapchain_->Present(SystemInterval, Flag); }
+	
+	//get
 	inline ID3D12Device* getDevice()const { return device_.Get(); }
 };
 

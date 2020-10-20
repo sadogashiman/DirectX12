@@ -1,10 +1,5 @@
 #pragma once
-enum AssetsMode
-{
-	kTexture,
-	kShaderFile,
-	kResource
-};
+
 class Support
 {
 private:
@@ -12,9 +7,11 @@ private:
 public:
 	Support();
 	~Support();
+
+	static HRESULT createShaderV6(std::filesystem::path ShaderPath, std::wstring Profile, ComPtr<ID3DBlob>& ShaderBlob, ComPtr<ID3DBlob>& ErrorMessage);
+
+	//get
 	static void getHardwareAdapter(_In_ IDXGIFactory1* Factory,_Outptr_opt_result_maybenull_ IDXGIAdapter1** Adapter, bool RequestHighPerformanceAdapter = false);
-	static void setCustomWindowText(LPCWSTR Text);
-	static void parseCommandLineArgs(_In_reads_(argc) WCHAR* args[], int argc);
 };
 
 #if defined(_DEBUG)||defined(DBG)

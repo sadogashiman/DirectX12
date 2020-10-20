@@ -22,8 +22,8 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Direct3D.cpp" />
     <ClCompile Include="DirectInput.cpp" />
-    <ClCompile Include="LuaSystem.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Support.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Singleton.cpp" />
@@ -39,8 +39,10 @@
     <ClInclude Include="DirectInput.h" />
     <ClInclude Include="DXHelper.h" />
     <ClInclude Include="InputKeyCode.h" />
-    <ClInclude Include="LuaSystem.h" />
+    <ClInclude Include="lua_Helper.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="Polygon.h" />
     <ClInclude Include="Span.h" />
     <ClInclude Include="Support.h" />
     <ClInclude Include="error.h" />
@@ -50,7 +52,23 @@
     <ClInclude Include="System.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="InitWindow.lua" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="color_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="color_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">6.0</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

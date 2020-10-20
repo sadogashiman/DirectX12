@@ -30,8 +30,8 @@
 #include <d3d12shader.h>
 #include <dinput.h>
 #include <DirectXMath.h>
+#include <dxcapi.h>
 #include "d3dx12.h"
-#include <DirectXCollision.h>
 
 //Lua関係
 #include <lua.hpp>
@@ -58,6 +58,7 @@
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"dxgi.lib")
 #pragma comment(lib,"d3dcompiler.lib")
+#pragma comment(lib,"dxcompiler.lib")
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"shlwapi.lib")
 #pragma comment(lib,"lua.lib")
@@ -82,7 +83,6 @@ const float kScreen_near = 0.1F;
 const bool kFullScreen = false;
 const bool kVsync = true;
 const bool kTgs = false; //TGSブース展示用ボタン配置
-const std::string kResourceRootPath = "Resource/";
 
 //******************************
 //　　		  列挙体
@@ -92,4 +92,9 @@ const std::string kResourceRootPath = "Resource/";
 
 //******************************
 //　　		  構造体
+//******************************
+
+
+//******************************
+//　　		  クラス
 //******************************

@@ -1,5 +1,7 @@
 #include "System.h"
 #include "Singleton.h"
+#include "stdafx.h"
+#include "lua_Helper.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {

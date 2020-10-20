@@ -1,13 +1,16 @@
 #include "stdafx.h"
 #include "Direct3D.h"
 #include "error.h"
-#include "Support.h"
 #include "Singleton.h"
 #include "System.h"
 #include "DXHelper.h"
 
 Direct3D::Direct3D()
 {
+	rendertargets_.resize(kBufferCount);
+	fencevalue_.resize(kBufferCount);
+	frameindex_ = 0;
+	fenceevent_ = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 Direct3D::~Direct3D()
@@ -53,13 +56,11 @@ void Direct3D::render()
 	hr = swapchain_->Present(1, 0);
 	ThrowIfFailed(hr);
 
-	moveToNextFrame();
 }
 
 void Direct3D::destroy()
 {
 	//GPUで実行待ちのリソースがないか確認(デストラクタでクリーンアップクリーンアップ)
-	waitForGPU();
 
 	CloseHandle(fenceevent_);
 }
@@ -86,67 +87,50 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	gbvdebug->SetEnableGPUBasedValidation(true);
 #endif // _DEBUG
 
-	D3D_FEATURE_LEVEL featurelevel;
+	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_12_1;
 	HRESULT hr;
 	D3D12_COMMAND_QUEUE_DESC commandqueuedesc;
 	DXGI_SWAP_CHAIN_DESC1 swapchaindesc;
 
 
-	//機能レベルの設定
-	featurelevel = D3D_FEATURE_LEVEL_12_1;
-
-	//Direct3Dデバイスの作成
-	hr = D3D12CreateDevice(
-		NULL,
-		featurelevel,
-		__uuidof(ID3D12Device),
-		(void**)device_.ReleaseAndGetAddressOf()
-	);
-
 	//ファクトリを作成
-	ComPtr<IDXGIFactory4> factory;
+	ComPtr<IDXGIFactory3> factory;
 	hr = CreateDXGIFactory2(dxgidebugflag, IID_PPV_ARGS(&factory));
 	ThrowIfFailed(hr);
 
-
-	//GPUが複数個存在することを前提に初期化
-	if (kUseHardwareAdapter)
+	//ハードウェアアダプタの検索
+	ComPtr<IDXGIAdapter1> useadapter;
+	ComPtr<IDXGIAdapter1>adapter;
+	unsigned int adapterindex = 0;
+	while (DXGI_ERROR_NOT_FOUND != factory->EnumAdapters1(adapterindex, &adapter))
 	{
-		ComPtr<IDXGIAdapter1> hardwareadapter;
-		Support::getHardwareAdapter(factory.Get(), &hardwareadapter);
+		DXGI_ADAPTER_DESC1 desc1{};
+		adapter->GetDesc1(&desc1);
+		++adapterindex;
+		if (desc1.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)
+			continue;
 
-		//Direct3Dデバイスを作成
 		hr = D3D12CreateDevice(
-			hardwareadapter.Get(),
-			D3D_FEATURE_LEVEL_12_1,
-			IID_PPV_ARGS(&device_)
+			adapter.Get(),
+			featurelevel,
+			__uuidof(ID3D12Device),
+			nullptr
 		);
-		if (FAILED(hr))
-		{
-			//機能レベルを下げることを出力して機能レベルを再設定
-			OutputDebugString("It does not correspond to the Feature level set by the GPU. Lower the Feature level and reset it");
-			hr = D3D12CreateDevice(
-				hardwareadapter.Get(),
-				D3D_FEATURE_LEVEL_12_0,
-				IID_PPV_ARGS(&device_));
-			ThrowIfFailed(hr);
-		}
+		if (SUCCEEDED(hr))
+			break;
 	}
-	else
-	{
-		ComPtr<IDXGIAdapter> warpadapter;
-		//アダプタの列挙
-		hr = factory->EnumWarpAdapter(IID_PPV_ARGS(&warpadapter));
-		ThrowIfFailed(hr);
 
-		//warpアダプタを使用するときは機能レベルを下げておく
-		hr = D3D12CreateDevice(
-			warpadapter.Get(),
-			D3D_FEATURE_LEVEL_11_0,
-			IID_PPV_ARGS(&device_)
-		);
-		ThrowIfFailed(hr);
-	}
+	//使用するアダプタ
+	adapter.As(&useadapter);
+
+	//D3Dデバイスを作成
+	hr = D3D12CreateDevice(
+		useadapter.Get(),
+		featurelevel,
+		IID_PPV_ARGS(&device_)
+	);
+	ThrowIfFailed(hr);
+
 
 	//コマンドキューを初期化
 	ZeroMemory(&commandqueuedesc, sizeof(commandqueuedesc));
@@ -172,8 +156,6 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	swapchaindesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapchaindesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapchaindesc.SampleDesc.Count = 1;
-	swapchaindesc.SampleDesc.Quality = 0;
-	swapchaindesc.Flags = 0;
 
 	//スワップチェインを作成
 	ComPtr<IDXGISwapChain1> swapchain;
@@ -187,17 +169,105 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	);
 	ThrowIfFailed(hr);
 
-
 	//Alt+Enterを無効にする
 	hr = factory->MakeWindowAssociation(Singleton<System>::getPtr()->getWindowHandle(), DXGI_MWA_NO_ALT_ENTER);
 	ThrowIfFailed(hr);
 
-	hr = swapchain.As(&swapchain_);
+	hr = swapchain.As(&swapchain_); //IDXGISwapChain4取得
 	ThrowIfFailed(hr);
 
 	//バックバッファの数を取得
 	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
 
+	//各ディスクリプターヒープの作成
+	createDescriptorHeaps();
+
+	//レンダーターゲットビューの作成
+	prepareRenderTargetView();
+
+	//デプスバッファ関連の作成
+	createDepthBuffer();
+
+	//コマンドアロケーターの準備
+	createCommandAllocators();
+
+	//描画フレーム同期用フェンス生成
+	createFrameFences();
+
+
+	//コマンドリストの初期化
+	hr = device_->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		cmdallocator_[frameindex_].Get(),
+		nullptr,
+		IID_PPV_ARGS(&cmdlist_)
+	);
+
+	cmdlist_->Close();
+
+	//ビューポートの作成
+	viewport_ = CD3DX12_VIEWPORT(0.0F, 0.0F, float(kWindow_Width), float(kWindow_Height));
+	scissorrect_ = CD3DX12_RECT(0, 0, LONG(kWindow_Width), LONG(kWindow_Height));
+
+}
+
+void Direct3D::waiPrevFrame()
+{
+	auto& fence = fence_[frameindex_];
+	const auto currentvalue = ++framecounter_[frameindex_];
+	cmdqueue_->Signal(fence.Get(), currentvalue);
+
+	//次処理するコマンド(アロケーター)のものは実行完了済みかをついになっているフェンスで確認
+	auto nextindex = (frameindex_ + 1) % kBufferCount;
+	const auto finishexpect = fencevalue_[nextindex];
+	const auto nextfencevalue = fence_[nextindex]->GetCompletedValue();
+	if (nextfencevalue < finishexpect)
+	{
+		fence_[nextindex]->SetEventOnCompletion(finishexpect, fenceevent_);
+		WaitForSingleObject(fenceevent_, kGpuWaitTimeout);
+	}
+}
+
+
+void Direct3D::createCommandAllocators()
+{
+	HRESULT hr;
+	//配列サイズ変更
+	cmdallocator_.resize(kBufferCount);
+
+	//フレームごとにコマンドアロケータとレンダーターゲットっビューを作成
+	for (UINT i = 0; i < kBufferCount; i++)
+	{
+		hr = device_->CreateCommandAllocator(
+			D3D12_COMMAND_LIST_TYPE_DIRECT,
+			IID_PPV_ARGS(&cmdallocator_[i]));
+		ThrowIfFailed(hr);
+	}
+}
+
+void Direct3D::createFrameFences()
+{
+	HRESULT hr;
+
+	//配列サイズ変更
+	fence_.resize(kBufferCount);
+
+	for (int i = 0; i < kBufferCount; i++)
+	{
+		hr = device_->CreateFence(
+			0,
+			D3D12_FENCE_FLAG_NONE,
+			IID_PPV_ARGS(&fence_[i])
+		);
+		ThrowIfFailed(hr);
+	}
+
+}
+
+void Direct3D::createDescriptorHeaps()
+{
+	HRESULT hr;
 	//descriptor heapの設定(RTV)
 	D3D12_DESCRIPTOR_HEAP_DESC rtvheapdesc;
 	ZeroMemory(&rtvheapdesc, sizeof(rtvheapdesc));
@@ -224,32 +294,42 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	//サイズを取得
 	depthstencildescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
+}
+
+void Direct3D::prepareRenderTargetView()
+{
+	HRESULT hr;
 	//フレームリソースを作成
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvhandle(rendertargetviewheap_->GetCPUDescriptorHandleForHeapStart());
 
-	//フレームごとにコマンドアロケータとレンダーターゲットっビューを作成
-	for (UINT i = 0; i < kBufferCount; i++)
+	for (int i = 0; i < kBufferCount; ++i)
 	{
-		hr = swapchain_->GetBuffer(i, IID_PPV_ARGS(&rendertargets[i]));
+		hr = swapchain_->GetBuffer(i, IID_PPV_ARGS(&rendertargets_[i]));
 		ThrowIfFailed(hr);
 
-		device_->CreateRenderTargetView(rendertargets[i].Get(), nullptr, rtvhandle);
+		device_->CreateRenderTargetView(rendertargets_[i].Get(), nullptr, rtvhandle);
 		rtvhandle.Offset(1, rendertargetdescriptionsize_);
-
-		hr = device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&cmdallocator_[i]));
-		ThrowIfFailed(hr);
 	}
+}
 
-	//デプスステンシルビューの設定
-	D3D12_DEPTH_STENCIL_VIEW_DESC depthstencildesc;
-	ZeroMemory(&depthstencildesc, sizeof(depthstencildesc));
-	depthstencildesc.Format = DXGI_FORMAT_D32_FLOAT;
-	depthstencildesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	depthstencildesc.Flags = D3D12_DSV_FLAG_NONE;
+void Direct3D::createDepthBuffer()
+{
+	HRESULT hr;
+
+	auto depthbufferdesc = CD3DX12_RESOURCE_DESC::Tex2D(
+		DXGI_FORMAT_D32_FLOAT,
+		kWindow_Width,
+		kWindow_Height,
+		1,
+		0,
+		1,
+		0,
+		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+	);
 
 	//クリア値の設定
 	D3D12_CLEAR_VALUE depthoptimizedclearvalue;
-	depthoptimizedclearvalue.Format = DXGI_FORMAT_D32_FLOAT;
+	depthoptimizedclearvalue.Format = depthbufferdesc.Format;
 	depthoptimizedclearvalue.DepthStencil.Depth = 1.0F;
 	depthoptimizedclearvalue.DepthStencil.Stencil = 0;
 
@@ -263,83 +343,21 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	);
 	ThrowIfFailed(hr);
 
-	NAME_D3D12_OBJECT(depthstencil_);
+	//デプスステンシルビュー作成
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvdesc
+	{
+		DXGI_FORMAT_D32_FLOAT,
+		D3D12_DSV_DIMENSION_TEXTURE2D,
+		D3D12_DSV_FLAG_NONE,
+		{
+			0
+		}
+	};
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsvhandle(depthstencilviewheap_->GetCPUDescriptorHandleForHeapStart());
 
 	//デプスステンシルの作成
-	device_->CreateDepthStencilView(depthstencil_.Get(), &depthstencildesc, depthstencilviewheap_.Get()->GetCPUDescriptorHandleForHeapStart());
+	device_->CreateDepthStencilView(depthstencil_.Get(), &dsvdesc, depthstencilviewheap_.Get()->GetCPUDescriptorHandleForHeapStart());
 
-	//コンスタントバッファの作成
-	const UINT constantbuffersize = sizeof(ConstantBuffer) * kBufferCount;
-	hr = device_->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(constantbuffersize),
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&constantbuffer_)
-	);
-	ThrowIfFailed(hr);
 
-	//コンスタントバッファビューの設定
-	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvdesc;
-	ZeroMemory(&cbvdesc, sizeof(cbvdesc));
-	cbvdesc.BufferLocation = constantbuffer_->GetGPUVirtualAddress();
-	cbvdesc.SizeInBytes = constantbuffersize;
 
-	//コンスタントバッファをマップして初期化
-	CD3DX12_RANGE readrange(0, 0);
-	hr = constantbuffer_->Map(0, &readrange, reinterpret_cast<void**>(&constantbufferviewbegin_));
-	if (FAILED(hr))
-	{
-		ThrowIfFailed(hr);
-	}
-
-	//コマンドリストの初期化
-	hr = device_->CreateCommandList(
-		0, 
-		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		cmdallocator_[frameindex_].Get(),
-		nullptr,
-		IID_PPV_ARGS(&cmdlist_)
-	);
-	if (FAILED(hr))
-	{
-		ThrowIfFailed(hr);
-	}
-
-	cmdlist_->Close();
-
-}
-
-void Direct3D::waitForGPU()
-{
-	HRESULT hr;
-	hr = cmdqueue_->Signal(fence_.Get(), fencevalue_[frameindex_]);
-	ThrowIfFailed(hr);
-
-	//フェンスの処理がされるまで待機
-	hr = fence_->SetEventOnCompletion(fencevalue_[frameindex_], fenceevent_);
-	ThrowIfFailed(hr);
-	WaitForSingleObjectEx(fenceevent_, INFINITE, FALSE);
-
-	//現在のフレームのフェンスの値をインクリメント
-	fencevalue_[frameindex_]++;
-}
-
-void Direct3D::moveToNextFrame()
-{
-	const UINT64 currentfencevalue = fencevalue_[frameindex_];
-	ThrowIfFailed(cmdqueue_->Signal(fence_.Get(), currentfencevalue));
-
-	//フレームインデックスを更新
-	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
-
-	if (fence_->GetCompletedValue() < fencevalue_[frameindex_])
-	{
-		ThrowIfFailed(fence_->SetEventOnCompletion(fencevalue_[frameindex_], fenceevent_));
-		WaitForSingleObjectEx(fenceevent_, INFINITE, FALSE);
-	}
-
-	//フェンスの値を次のフレームへ
-	fencevalue_[frameindex_] = currentfencevalue + 1;
 }

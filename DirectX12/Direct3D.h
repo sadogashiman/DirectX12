@@ -3,6 +3,8 @@
 const bool kUseHardwareAdapter = true;	//ハードウェアを使用するかどうか
 const unsigned int kGpuWaitTimeout = (10 * 1000);//10s
 const unsigned int kBufferCount = 2U;
+const float kClearColor[4] = { 0.0F,0.0F,0.0F,1.0F };
+
 class Direct3D
 {
 private:
@@ -21,7 +23,7 @@ private:
 	ComPtr<ID3D12DescriptorHeap> depthstencilviewheap_;		//デプスステンシルヒープ
 	std::vector<ComPtr<ID3D12Resource1>> rendertargets_;		//バックバッファ
 	std::vector<ComPtr<ID3D12CommandAllocator>> cmdallocator_;			//コマンドの割り当て
-	ComPtr<ID3D12GraphicsCommandList6> cmdlist_;				//レンダリング用のコマンドリストのカプセル化
+	ComPtr<ID3D12GraphicsCommandList> cmdlist_;				//レンダリング用のコマンドリストのカプセル化
 	ComPtr<ID3D12PipelineState> pipelinestate_;				//グラフィックスパイプラインのステータス
 	ComPtr<ID3D12Resource> depthstencil_;					//デプスステンシル
 	ComPtr<ID3D12Resource> constantbuffer_;					//コンスタントバッファ

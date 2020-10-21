@@ -36,8 +36,6 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	scissorrect_.right = static_cast<LONG>(kWindow_Width);
 	scissorrect_.bottom = static_cast<LONG>(kWindow_Height);
 
-
-
 }
 
 void Direct3D::update()
@@ -48,20 +46,61 @@ void Direct3D::render()
 {
 	HRESULT hr;
 
-	//コマンドリスト実行
-	ID3D12CommandList* commandlists[] = { cmdlist_.Get() };
-	cmdqueue_->ExecuteCommandLists(_countof(commandlists), commandlists);
+	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
 
-	//present
-	hr = swapchain_->Present(1, 0);
-	ThrowIfFailed(hr);
+	//コマンドリセット
+	cmdallocator_[frameindex_]->Reset();
+	cmdlist_->Reset(cmdallocator_[frameindex_].Get(),nullptr);
 
+	//スワップチェイン表示可能からレンダーターゲット描画可能へ
+	auto barrirtorendertarget = CD3DX12_RESOURCE_BARRIER::Transition(
+		rendertargets_[frameindex_].Get(),
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	cmdlist_->ResourceBarrier(1, &barrirtorendertarget);
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
+		rendertargetviewheap_->GetCPUDescriptorHandleForHeapStart(),
+		frameindex_,
+		rendertargetdescriptionsize_);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
+		depthstencilviewheap_->GetCPUDescriptorHandleForHeapStart());
+
+	//カラーバッファ（レンダーターゲットビューのクリア)
+	cmdlist_->ClearRenderTargetView(rtv, kClearColor, 0, nullptr);
+
+	//深度バッファのクリア
+	cmdlist_->ClearDepthStencilView(
+		dsv,
+		D3D12_CLEAR_FLAG_DEPTH,
+		1.0F,
+		0,
+		0,
+		nullptr
+	);
+
+	//描画先をセット
+	cmdlist_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+
+	auto barrirtopresent = CD3DX12_RESOURCE_BARRIER::Transition(
+		rendertargets_[frameindex_].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+
+	cmdlist_->ResourceBarrier(1, &barrirtopresent);
+	cmdlist_->Close();
+
+	ID3D12CommandList* lists[] = { cmdlist_.Get() };
+	cmdqueue_->ExecuteCommandLists(1, lists);
+
+	swapchain_->Present(1, 0);
+	
+	waiPrevFrame();
 }
 
 void Direct3D::destroy()
 {
-	//GPUで実行待ちのリソースがないか確認(デストラクタでクリーンアップクリーンアップ)
-
 	CloseHandle(fenceevent_);
 }
 
@@ -194,28 +233,22 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	//描画フレーム同期用フェンス生成
 	createFrameFences();
 
-
 	//コマンドリストの初期化
 	hr = device_->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		cmdallocator_[frameindex_].Get(),
+		cmdallocator_[0].Get(),
 		nullptr,
 		IID_PPV_ARGS(&cmdlist_)
 	);
 
 	cmdlist_->Close();
-
-	//ビューポートの作成
-	viewport_ = CD3DX12_VIEWPORT(0.0F, 0.0F, float(kWindow_Width), float(kWindow_Height));
-	scissorrect_ = CD3DX12_RECT(0, 0, LONG(kWindow_Width), LONG(kWindow_Height));
-
 }
 
 void Direct3D::waiPrevFrame()
 {
 	auto& fence = fence_[frameindex_];
-	const auto currentvalue = ++framecounter_[frameindex_];
+	const auto currentvalue = ++fencevalue_[frameindex_];
 	cmdqueue_->Signal(fence.Get(), currentvalue);
 
 	//次処理するコマンド(アロケーター)のものは実行完了済みかをついになっているフェンスで確認
@@ -262,7 +295,6 @@ void Direct3D::createFrameFences()
 		);
 		ThrowIfFailed(hr);
 	}
-
 }
 
 void Direct3D::createDescriptorHeaps()
@@ -357,7 +389,4 @@ void Direct3D::createDepthBuffer()
 
 	//デプスステンシルの作成
 	device_->CreateDepthStencilView(depthstencil_.Get(), &dsvdesc, depthstencilviewheap_.Get()->GetCPUDescriptorHandleForHeapStart());
-
-
-
 }

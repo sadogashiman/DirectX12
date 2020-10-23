@@ -46,6 +46,12 @@
     <Filter Include="リソース ファイル\HLSL\Color">
       <UniqueIdentifier>{c83d05ce-43a5-472c-830d-2ba9863f9bc5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{9e84b9ad-07b7-421e-998a-77e96e7dbea6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Support\Lua">
+      <UniqueIdentifier>{0466ec65-3f6f-4834-8539-5fb723fd2492}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -78,14 +84,11 @@
     <ClCompile Include="Polygon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="ColorShader.cpp">
+      <Filter>Shader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="error.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="release.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Singleton.h">
       <Filter>Sigleton</Filter>
     </ClInclude>
@@ -94,9 +97,6 @@
     </ClInclude>
     <ClInclude Include="System.h">
       <Filter>System</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dx12.h">
-      <Filter>Support\Microsoft</Filter>
     </ClInclude>
     <ClInclude Include="DXHelper.h">
       <Filter>Support\Microsoft</Filter>
@@ -122,14 +122,29 @@
     <ClInclude Include="Direct3D.h">
       <Filter>DirectX\Direct3D</Filter>
     </ClInclude>
-    <ClInclude Include="lua_Helper.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Polygon.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ColorShader.h">
+      <Filter>Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="State.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>Support\Microsoft</Filter>
+    </ClInclude>
+    <ClInclude Include="lua_Helper.h">
+      <Filter>Support\Lua</Filter>
+    </ClInclude>
+    <ClInclude Include="release.h">
+      <Filter>Support</Filter>
+    </ClInclude>
+    <ClInclude Include="error.h">
+      <Filter>Support</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

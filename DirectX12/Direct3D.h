@@ -53,7 +53,7 @@ private:
 
 	Model model_;
 
-	void loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear);
+	void loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, HWND Hwnd);
 	void waiPrevFrame();
 
 	//create
@@ -66,9 +66,11 @@ private:
 public:
 	Direct3D();
 	~Direct3D();
-	void init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear,const wchar_t* MeshShaderFileName,const wchar_t* PixelShaderFileName);
+	void init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear,const wchar_t* MeshShaderFileName,const wchar_t* PixelShaderFileName,HWND Hwnd);
 	void update();
 	void render();
+	void begin();
+	void end();
 	void destroy();
 
 	//•`‰æŒn
@@ -76,5 +78,14 @@ public:
 	
 	//get
 	inline ID3D12Device* getDevice()const { return device_.Get(); }
+	inline IDXGISwapChain4* getSwapChain()const { return swapchain_.Get(); }
+	inline ID3D12CommandQueue* getCommandQueue()const { return cmdqueue_.Get(); }
+	inline ID3D12PipelineState* getPipelineState()const { return pipelinestate_.Get(); }
+	inline ComPtr<ID3D12GraphicsCommandList> getCommandList(){ return cmdlist_; }
+	inline CD3DX12_VIEWPORT getViewport()const { return viewport_; }
+	inline CD3DX12_RECT getScissorRects()const { return scissorrect_; }
+	inline HANDLE getFenceEventHandle()const { return fenceevent_; }
+	inline std::vector<ComPtr<ID3D12Fence1>> getFence() { return fence_; }
+	inline std::vector<unsigned long long >getFenceValue() { return fencevalue_; }
 };
 

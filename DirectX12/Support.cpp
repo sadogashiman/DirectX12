@@ -24,8 +24,9 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	}
 
 	//ファイル展開
-	std::ifstream in(ShaderPath, std::ios::binary);
-	if (!in.is_open())
+	std::ifstream ifs;
+	ifs.open(ShaderPath, std::ios::binary);
+	if (!ifs.is_open())
 	{
 		return E_FAIL;
 	}
@@ -33,10 +34,10 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	std::vector<char> data;
 
 	//配列サイズ変更
-	data.resize(in.seekg(0, in.end).tellg());
+	data.resize(ifs.seekg(0, ifs.end).tellg());
 
 	//ポインタを最初に戻してデータを取得
-	in.seekg(0, in.beg).read(data.data(), data.size());
+	ifs.seekg(0, ifs.beg).read(data.data(), data.size());
 
 	//DXCによるコンパイル
 	ComPtr<IDxcLibrary> library;
@@ -49,7 +50,7 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
 	LPCWSTR compileflag[] = {
 #ifdef _DEBUG
-			L"/Zi"
+			L"/Zi",L"/08",
 #else
 			"L/02" //リリースビルド時は最適化
 #endif // _DEBUG

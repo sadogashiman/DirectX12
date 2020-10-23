@@ -5,6 +5,7 @@
 #include "DirectInput.h"
 #include "DXHelper.h"
 #include "Polygon.h"
+#include "ColorShader.h"
 
 System::System()
 {
@@ -31,7 +32,6 @@ bool System::init()
 		return false;
 	}
 
-	
 
 
 
@@ -79,7 +79,6 @@ void System::destroy()
 
 bool System::update()
 {
-
 	return true;
 }
 
@@ -118,7 +117,6 @@ void System::initWindows()
 
 	//LuaStateを破棄
 	lua_close(initlua);
-
 
 	//このオブジェクトへのポインタを作成
 	systemhandle = this;
@@ -188,8 +186,6 @@ void System::initWindows()
 		hinstance_,
 		NULL
 	);
-	Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near, L"test", L"test");
-
 
 	//ウィンドウにフォーカスをセット
 	ShowWindow(hwnd_, SW_SHOW);
@@ -245,7 +241,6 @@ LRESULT CALLBACK System::MessageHandler(HWND hWnd, UINT uMessage, WPARAM wParam,
 	{
 		return DefWindowProc(hWnd, uMessage, wParam, lParam);
 	}
-
 	}
 }
 
@@ -257,6 +252,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 	{
 		LPCREATESTRUCT createstruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(createstruct->lpCreateParams));
+		Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near, L"test", L"test",hWnd);
+		Singleton<ColorShader>::getPtr()->init();
+
 	}
 	return 0;
 	case WM_DESTROY:
@@ -269,7 +267,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 	{
 		//beginpaint()などのwindowsの描画機能を呼ばないとWM_PAINTが呼ばれ続ける挙動を利用する
 		Singleton<Direct3D>::getPtr()->update();
-		Singleton<Direct3D>::getPtr()->render();
+		Singleton<Direct3D>::getPtr()->begin();
+		Singleton<ColorShader>::getPtr()->makeCommand();
+		Singleton<Direct3D>::getPtr()->end();
 
 	}
 	default:

@@ -17,10 +17,13 @@ Direct3D::~Direct3D()
 {
 }
 
-void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName)
+void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName, HWND Hwnd)
 {
+
+
+
 	//パイプラインを作成
-	loadPipeline(ScreenWidth, ScreenHeight, Vsync, FullScreen, ScreenDepth, ScreenNear);
+	loadPipeline(ScreenWidth, ScreenHeight, Vsync, FullScreen, ScreenDepth, ScreenNear, Hwnd);
 
 
 	//ビューポートの設定
@@ -44,13 +47,18 @@ void Direct3D::update()
 
 void Direct3D::render()
 {
-	HRESULT hr;
 
+
+
+}
+
+void Direct3D::begin()
+{
 	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
 
 	//コマンドリセット
 	cmdallocator_[frameindex_]->Reset();
-	cmdlist_->Reset(cmdallocator_[frameindex_].Get(),nullptr);
+	cmdlist_->Reset(cmdallocator_[frameindex_].Get(), nullptr);
 
 	//スワップチェイン表示可能からレンダーターゲット描画可能へ
 	auto barrirtorendertarget = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -81,7 +89,10 @@ void Direct3D::render()
 
 	//描画先をセット
 	cmdlist_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+}
 
+void Direct3D::end()
+{
 	auto barrirtopresent = CD3DX12_RESOURCE_BARRIER::Transition(
 		rendertargets_[frameindex_].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
@@ -95,7 +106,7 @@ void Direct3D::render()
 	cmdqueue_->ExecuteCommandLists(1, lists);
 
 	swapchain_->Present(1, 0);
-	
+
 	waiPrevFrame();
 }
 
@@ -104,7 +115,7 @@ void Direct3D::destroy()
 	CloseHandle(fenceevent_);
 }
 
-void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear)
+void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, HWND Hwnd)
 {
 #ifdef _DEBUG
 	//デバッグ時のみデバッグレイヤーを有効化する
@@ -200,7 +211,7 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	ComPtr<IDXGISwapChain1> swapchain;
 	hr = factory->CreateSwapChainForHwnd(
 		cmdqueue_.Get(),
-		Singleton<System>::getPtr()->getWindowHandle(),
+		Hwnd,
 		&swapchaindesc,
 		nullptr,
 		nullptr,
@@ -209,7 +220,7 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	ThrowIfFailed(hr);
 
 	//Alt+Enterを無効にする
-	hr = factory->MakeWindowAssociation(Singleton<System>::getPtr()->getWindowHandle(), DXGI_MWA_NO_ALT_ENTER);
+	hr = factory->MakeWindowAssociation(Hwnd, DXGI_MWA_NO_ALT_ENTER);
 	ThrowIfFailed(hr);
 
 	hr = swapchain.As(&swapchain_); //IDXGISwapChain4取得

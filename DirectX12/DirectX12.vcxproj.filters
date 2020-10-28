@@ -152,13 +152,11 @@
     <None Include="InitWindow.lua">
       <Filter>リソース ファイル\Lua</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="color_vs.hlsl">
+    <None Include="color_ps.hlsl">
       <Filter>リソース ファイル\HLSL\Color</Filter>
-    </FxCompile>
-    <FxCompile Include="color_ps.hlsl">
+    </None>
+    <None Include="color_vs.hlsl">
       <Filter>リソース ファイル\HLSL\Color</Filter>
-    </FxCompile>
+    </None>
   </ItemGroup>
 </Project>

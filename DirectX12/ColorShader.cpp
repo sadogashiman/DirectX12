@@ -32,12 +32,12 @@ void ColorShader::init()
 	//シェーダーコンパイル
 	ComPtr<ID3DBlob> errblob;
 	hr = Support::createShaderV6("color_vs.hlsl", L"vs_6_0", vertexshader_, errblob);
-	if (FAILED(hr))
+	if (DXC_S_OK!=hr)
 	{
 		OutputDebugStringA((const char*)errblob->GetBufferPointer());
 	}
 	hr = Support::createShaderV6("color_ps.hlsl", L"ps_6_0", pixelshader_, errblob);
-	if (FAILED(hr))
+	if (DXC_S_OK != hr)
 	{
 		OutputDebugStringA((const char*)errblob->GetBufferPointer());
 	}
@@ -93,12 +93,8 @@ void ColorShader::init()
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelinestatedesc{};
 
 	//シェーダーのセット
-	//pipelinestatedesc.VS = CD3DX12_SHADER_BYTECODE(vertexshader_.Get());
-	pipelinestatedesc.VS.pShaderBytecode = vertexshader_.Get()->GetBufferPointer();
-	pipelinestatedesc.VS.BytecodeLength = vertexshader_.Get()->GetBufferSize();
-	//pipelinestatedesc.PS = CD3DX12_SHADER_BYTECODE(pixelshader_.Get());
-	pipelinestatedesc.PS.pShaderBytecode = pixelshader_.Get()->GetBufferPointer();
-	pipelinestatedesc.PS.BytecodeLength = pixelshader_.Get()->GetBufferSize();
+	pipelinestatedesc.VS = CD3DX12_SHADER_BYTECODE(vertexshader_.Get());
+	pipelinestatedesc.PS = CD3DX12_SHADER_BYTECODE(pixelshader_.Get());
 
 	//ブレンドステートのセット
 	pipelinestatedesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -123,6 +119,7 @@ void ColorShader::init()
 	pipelinestatedesc.SampleDesc = { 1,0 };
 	pipelinestatedesc.SampleMask = UINT_MAX; //これを忘れると描画されない
 
+	//レンダリングパイプラインの作成
 	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateGraphicsPipelineState(&pipelinestatedesc, IID_PPV_ARGS(&pipeline_));
 	if (FAILED(hr))
 	{

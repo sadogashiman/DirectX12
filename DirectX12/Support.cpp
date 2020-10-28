@@ -46,7 +46,10 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	ComPtr<IDxcOperationResult> dxcresult;
 
 	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
-	library->CreateBlobWithEncodingFromPinned(data.data(), UINT32(data.size()), CP_ACP, &source);
+	hr = library->CreateBlobWithEncodingFromPinned(data.data(), UINT32(data.size()), CP_ACP, &source);
+	if (FAILED(hr))
+		return hr;
+
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
 	LPCWSTR compileflag[] = {
 #ifdef _DEBUG
@@ -66,6 +69,25 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	else
 	{
 		dxcresult->GetErrorBuffer(reinterpret_cast<IDxcBlobEncoding**>(ErrorMessage.GetAddressOf()));
+	}
+
+	return hr;
+}
+
+HRESULT Support::createShader(std::filesystem::path ShaderPath, const wchar_t* Profile, ComPtr<ID3D10Blob>& ShaderBlob, ComPtr<ID3D10Blob>& ErrorMessage)
+{
+	HRESULT hr = S_OK;
+	std::ifstream fs;
+	ComPtr<ID3D10Blob> vertexshaderbuff = nullptr;
+
+	//パスを確認
+	if (std::filesystem::exists(ShaderPath))
+	{
+		//シェーダーコンパイル
+	}
+	else
+	{
+		return E_FAIL;
 	}
 
 	return hr;

@@ -3,13 +3,18 @@
 class Support
 {
 private:
+	LPVOID vertexblob_;
+	LPVOID pixelblob_;
 
 public:
 	Support();
 	~Support();
 
 	static HRESULT createShaderV6(std::filesystem::path ShaderPath, std::wstring Profile, ComPtr<ID3DBlob>& ShaderBlob, ComPtr<ID3DBlob>& ErrorMessage);
-
+	static HRESULT createShader(std::filesystem::path ShdaerPath, const wchar_t* Profile, ComPtr<ID3D10Blob>& ShaderBlob, ComPtr<ID3D10Blob>& ErrorMessage);
+	
+	//create
+	
 	//get
 	static void getHardwareAdapter(_In_ IDXGIFactory1* Factory,_Outptr_opt_result_maybenull_ IDXGIAdapter1** Adapter, bool RequestHighPerformanceAdapter = false);
 };

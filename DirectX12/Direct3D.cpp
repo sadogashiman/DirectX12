@@ -19,104 +19,6 @@ Direct3D::~Direct3D()
 
 void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName, HWND Hwnd)
 {
-
-
-
-	//パイプラインを作成
-	loadPipeline(ScreenWidth, ScreenHeight, Vsync, FullScreen, ScreenDepth, ScreenNear, Hwnd);
-
-
-	//ビューポートの設定
-	viewport_.Height = kWindow_Height;
-	viewport_.Width = kWindow_Width;
-	viewport_.MaxDepth = kScreen_depth;
-	viewport_.MinDepth = 0.0F;
-	viewport_.TopLeftX = 0.0F;
-	viewport_.TopLeftY = 0.0F;
-
-	scissorrect_.top = 0;
-	scissorrect_.left = 0;
-	scissorrect_.right = static_cast<LONG>(kWindow_Width);
-	scissorrect_.bottom = static_cast<LONG>(kWindow_Height);
-
-}
-
-void Direct3D::update()
-{
-}
-
-void Direct3D::render()
-{
-
-
-
-}
-
-void Direct3D::begin()
-{
-	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
-
-	//コマンドリセット
-	cmdallocator_[frameindex_]->Reset();
-	cmdlist_->Reset(cmdallocator_[frameindex_].Get(), nullptr);
-
-	//スワップチェイン表示可能からレンダーターゲット描画可能へ
-	auto barrirtorendertarget = CD3DX12_RESOURCE_BARRIER::Transition(
-		rendertargets_[frameindex_].Get(),
-		D3D12_RESOURCE_STATE_PRESENT,
-		D3D12_RESOURCE_STATE_RENDER_TARGET);
-	cmdlist_->ResourceBarrier(1, &barrirtorendertarget);
-
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
-		rendertargetviewheap_->GetCPUDescriptorHandleForHeapStart(),
-		frameindex_,
-		rendertargetdescriptionsize_);
-	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
-		depthstencilviewheap_->GetCPUDescriptorHandleForHeapStart());
-
-	//カラーバッファ（レンダーターゲットビューのクリア)
-	cmdlist_->ClearRenderTargetView(rtv, kClearColor, 0, nullptr);
-
-	//深度バッファのクリア
-	cmdlist_->ClearDepthStencilView(
-		dsv,
-		D3D12_CLEAR_FLAG_DEPTH,
-		1.0F,
-		0,
-		0,
-		nullptr
-	);
-
-	//描画先をセット
-	cmdlist_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-}
-
-void Direct3D::end()
-{
-	auto barrirtopresent = CD3DX12_RESOURCE_BARRIER::Transition(
-		rendertargets_[frameindex_].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_PRESENT
-	);
-
-	cmdlist_->ResourceBarrier(1, &barrirtopresent);
-	cmdlist_->Close();
-
-	ID3D12CommandList* lists[] = { cmdlist_.Get() };
-	cmdqueue_->ExecuteCommandLists(1, lists);
-
-	swapchain_->Present(1, 0);
-
-	waiPrevFrame();
-}
-
-void Direct3D::destroy()
-{
-	CloseHandle(fenceevent_);
-}
-
-void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, HWND Hwnd)
-{
 #ifdef _DEBUG
 	//デバッグ時のみデバッグレイヤーを有効化する
 	//デバイスの作成後に有効にすると意味がないのでデバイスの作成前に設定する
@@ -256,6 +158,10 @@ void Direct3D::loadPipeline(const int ScreenWidth, const int ScreenHeight, const
 	cmdlist_->Close();
 }
 
+void Direct3D::update()
+{
+}
+
 void Direct3D::waiPrevFrame()
 {
 	auto& fence = fence_[frameindex_];
@@ -271,8 +177,83 @@ void Direct3D::waiPrevFrame()
 		fence_[nextindex]->SetEventOnCompletion(finishexpect, fenceevent_);
 		WaitForSingleObject(fenceevent_, kGpuWaitTimeout);
 	}
+	//ビューポートの設定
+	viewport_.Height = kWindow_Height;
+	viewport_.Width = kWindow_Width;
+	viewport_.MaxDepth = kScreen_depth;
+	viewport_.MinDepth = 0.0F;
+	viewport_.TopLeftX = 0.0F;
+	viewport_.TopLeftY = 0.0F;
+
+	scissorrect_.top = 0;
+	scissorrect_.left = 0;
+	scissorrect_.right = static_cast<LONG>(kWindow_Width);
+	scissorrect_.bottom = static_cast<LONG>(kWindow_Height);
+
 }
 
+void Direct3D::begin()
+{
+	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
+
+	//コマンドリセット
+	cmdallocator_[frameindex_]->Reset();
+	cmdlist_->Reset(cmdallocator_[frameindex_].Get(), nullptr);
+
+	//スワップチェイン表示可能からレンダーターゲット描画可能へ
+	auto barrirtorendertarget = CD3DX12_RESOURCE_BARRIER::Transition(
+		rendertargets_[frameindex_].Get(),
+		D3D12_RESOURCE_STATE_PRESENT,
+		D3D12_RESOURCE_STATE_RENDER_TARGET);
+	cmdlist_->ResourceBarrier(1, &barrirtorendertarget);
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
+		rendertargetviewheap_->GetCPUDescriptorHandleForHeapStart(),
+		frameindex_,
+		rendertargetdescriptionsize_);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE dsv(
+		depthstencilviewheap_->GetCPUDescriptorHandleForHeapStart());
+
+	//カラーバッファ（レンダーターゲットビューのクリア)
+	cmdlist_->ClearRenderTargetView(rtv, kClearColor, 0, nullptr);
+
+	//深度バッファのクリア
+	cmdlist_->ClearDepthStencilView(
+		dsv,
+		D3D12_CLEAR_FLAG_DEPTH,
+		1.0F,
+		0,
+		0,
+		nullptr
+	);
+
+	//描画先をセット
+	cmdlist_->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+}
+
+void Direct3D::end()
+{
+	auto barrirtopresent = CD3DX12_RESOURCE_BARRIER::Transition(
+		rendertargets_[frameindex_].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_PRESENT
+	);
+
+	cmdlist_->ResourceBarrier(1, &barrirtopresent);
+	cmdlist_->Close();
+
+	ID3D12CommandList* lists[] = { cmdlist_.Get() };
+	cmdqueue_->ExecuteCommandLists(1, lists);
+
+	swapchain_->Present(1, 0);
+
+	waiPrevFrame();
+}
+
+void Direct3D::destroy()
+{
+	CloseHandle(fenceevent_);
+}
 
 void Direct3D::createCommandAllocators()
 {

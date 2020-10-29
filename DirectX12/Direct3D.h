@@ -53,7 +53,6 @@ private:
 
 	Model model_;
 
-	void loadPipeline(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, HWND Hwnd);
 	void waiPrevFrame();
 
 	//create
@@ -68,7 +67,6 @@ public:
 	~Direct3D();
 	void init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear,const wchar_t* MeshShaderFileName,const wchar_t* PixelShaderFileName,HWND Hwnd);
 	void update();
-	void render();
 	void begin();
 	void end();
 	void destroy();

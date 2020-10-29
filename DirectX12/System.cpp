@@ -270,7 +270,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 		Singleton<Direct3D>::getPtr()->begin();
 		Singleton<ColorShader>::getPtr()->makeCommand();
 		Singleton<Direct3D>::getPtr()->end();
-
 	}
 	default:
 	{

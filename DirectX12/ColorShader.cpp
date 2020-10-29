@@ -24,10 +24,18 @@ void ColorShader::init()
 
 	uint32_t indices[] = { 0,1,2 };
 
-	//頂点バッファのインデックスバッファの作成
+	//頂点バッファとインデックスバッファの作成
 	vertexbuffer_ = createBuffer(sizeof(vertices), vertices);
 	indexbuffer_ = createBuffer(sizeof(indices), indices);
 	indexcount_ = _countof(indices);
+
+	//頂点バッファビューとインデックスバッファビューの作成
+	vertexbufferview_.BufferLocation = vertexbuffer_->GetGPUVirtualAddress();
+	vertexbufferview_.SizeInBytes = sizeof(vertices);
+	vertexbufferview_.StrideInBytes = sizeof(Vertex);
+	indexbufferview_.BufferLocation = indexbuffer_->GetGPUVirtualAddress();
+	indexbufferview_.SizeInBytes = sizeof(indices);
+	indexbufferview_.Format = DXGI_FORMAT_R32_UINT;
 
 	//シェーダーコンパイル
 	ComPtr<ID3DBlob> errblob;
@@ -120,7 +128,7 @@ void ColorShader::init()
 	pipelinestatedesc.SampleMask = UINT_MAX; //これを忘れると描画されない
 
 	//レンダリングパイプラインの作成
-	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateGraphicsPipelineState(&pipelinestatedesc, IID_PPV_ARGS(&pipeline_));
+	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateGraphicsPipelineState(&pipelinestatedesc, IID_PPV_ARGS(pipeline_.GetAddressOf()));
 	if (FAILED(hr))
 	{
 		throw std::runtime_error("CreateGraphicsPipelineState faild.");

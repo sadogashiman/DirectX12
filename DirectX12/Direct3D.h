@@ -3,7 +3,7 @@
 const bool kUseHardwareAdapter = true;	//ハードウェアを使用するかどうか
 const unsigned int kGpuWaitTimeout = (10 * 1000);//10s
 const unsigned int kBufferCount = 2U;
-const float kClearColor[4] = { 0.0F,0.0F,0.0F,1.0F };
+const float kClearColor[4] = { 0.0F,0.0F,1.0F,1.0F };
 
 class Direct3D
 {
@@ -65,7 +65,7 @@ private:
 public:
 	Direct3D();
 	~Direct3D();
-	void init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear,const wchar_t* MeshShaderFileName,const wchar_t* PixelShaderFileName,HWND Hwnd);
+	void init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear,HWND Hwnd);
 	void begin();
 	void end();
 	void destroy();

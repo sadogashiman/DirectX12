@@ -17,7 +17,7 @@ Direct3D::~Direct3D()
 {
 }
 
-void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, const wchar_t* MeshShaderFileName, const wchar_t* PixelShaderFileName, HWND Hwnd)
+void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, HWND Hwnd)
 {
 #ifdef _DEBUG
 	//デバッグ時のみデバッグレイヤーを有効化する

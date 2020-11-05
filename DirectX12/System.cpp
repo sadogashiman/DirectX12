@@ -35,6 +35,8 @@ bool System::init()
 		return false;
 	}
 
+	Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight,kFullScreen, kVsync, kScreen_depth, kScreen_near, hwnd_);
+
 	scene_.reset(new Game);
 	if (!scene_.get()->init())
 	{
@@ -82,10 +84,6 @@ void System::run()
 			}
 		}
 	}
-
-
-
-
 }
 
 void System::destroy()
@@ -115,6 +113,8 @@ bool System::update()
 	{
 		scene_.get()->destroy();
 	}
+	if (!render())
+		return false;
 
 	return true;
 }

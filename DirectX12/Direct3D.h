@@ -53,7 +53,7 @@ private:
 
 	Model model_;
 
-	void waiPrevFrame();
+	void waitPrevFrame();
 
 	//create
 	void createCommandAllocators();
@@ -66,7 +66,6 @@ public:
 	Direct3D();
 	~Direct3D();
 	void init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear,const wchar_t* MeshShaderFileName,const wchar_t* PixelShaderFileName,HWND Hwnd);
-	void update();
 	void begin();
 	void end();
 	void destroy();

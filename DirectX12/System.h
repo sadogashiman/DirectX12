@@ -1,6 +1,7 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include<Windows.h>
+#include "SceneBase.h"
 class System
 {
 private:
@@ -13,9 +14,10 @@ private:
 	LPCWSTR appname_;
 	HINSTANCE hinstance_;
 	HWND hwnd_;
-
+	std::unique_ptr<SceneBase> scene_;
 
 	bool update();
+	bool render();
 	void initWindows();
 	void destroyWindows();
 

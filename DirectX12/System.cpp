@@ -6,6 +6,9 @@
 #include "DXHelper.h"
 #include "Polygon.h"
 #include "ColorShader.h"
+#include "Game.h"
+#include "Timer.h"
+
 
 System::System()
 {
@@ -32,45 +35,57 @@ bool System::init()
 		return false;
 	}
 
+	scene_.reset(new Game);
+	if (!scene_.get()->init())
+	{
+		Error::showDialog("Sceneの初期化に失敗");
+		return false;
+	}
 
-
-
+	Singleton<Timer>::getPtr()->setTimerStatus(true);
 
 	return true;
 }
 
 void System::run()
 {
-	MSG msg;
-	bool result;
-	bool done;
+	MSG message;
 
-	//構造体初期化
-	ZeroMemory(&msg, sizeof(MSG));
+	//メッセージ構造体初期化
+	ZeroMemory(&message, sizeof(MSG));
 
-	done = false;
-
-	while (!done)
+	//メインループ
+	while (1)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		if (PeekMessage(&message, NULL, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			TranslateMessage(&message);
+			DispatchMessage(&message);
 		}
 
-		if (msg.message == WM_QUIT||Singleton<DirectInput>::getPtr()->isKeyPressed(DIK_ESCAPE))
+		if (message.message == WM_QUIT)
 		{
-			done = true;
+			break;
 		}
 		else
 		{
-			result = update();
-			if (!result)
+			Singleton<Timer>::getPtr()->update();
+
+			//60fpsに固定
+			if (Singleton<Timer>::getPtr()->fpsControl())
 			{
-				done = true;
+				if (!update())
+				{
+					break;
+				}
+
 			}
 		}
 	}
+
+
+
+
 }
 
 void System::destroy()
@@ -79,6 +94,40 @@ void System::destroy()
 
 bool System::update()
 {
+	SceneBase* tmp;
+	Singleton<DirectInput>::getPtr()->update();
+
+	if (Singleton<DirectInput>::getPtr()->isKeyPressed(DIK_ESCAPE))
+	{
+		return false;
+	}
+	//更新
+	tmp = scene_.get()->update();
+
+	//nullptrなら終了
+	if (tmp == nullptr)
+	{
+		return false;
+	}
+
+	//シーンチェンジ
+	if (scene_.get() != tmp)
+	{
+		scene_.get()->destroy();
+	}
+
+	return true;
+}
+
+bool System::render()
+{
+	bool result;
+	Singleton<Direct3D>::getPtr()->begin();
+	result = scene_.get()->render();
+	if (!result)
+		return result;
+	Singleton<Direct3D>::getPtr()->end();
+
 	return true;
 }
 
@@ -101,9 +150,9 @@ void System::initWindows()
 
 	//関数を指定
 	lua_getglobal(initlua, "init");
-	
+
 	//テーブルをスタックに積む
-	lua_pcall(initlua, 0, 2, 0); 
+	lua_pcall(initlua, 0, 2, 0);
 
 	//テーブルからパラメーターを取得
 	lua_getfield(initlua, 1, "width");
@@ -248,28 +297,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMessage)
 	{
-	case WM_CREATE:
-	{
-		LPCREATESTRUCT createstruct = reinterpret_cast<LPCREATESTRUCT>(lParam);
-		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(createstruct->lpCreateParams));
-		Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight, kVsync, kFullScreen, kScreen_depth, kScreen_near, L"test", L"test",hWnd);
-		Singleton<ColorShader>::getPtr()->init();
-
-	}
-	return 0;
 	case WM_DESTROY:
 	case WM_CLOSE:
 	{
 		PostQuitMessage(0);
 		return 0;
-	}
-	case WM_PAINT:
-	{
-		//beginpaint()などのwindowsの描画機能を呼ばないとWM_PAINTが呼ばれ続ける挙動を利用する
-		Singleton<Direct3D>::getPtr()->update();
-		Singleton<Direct3D>::getPtr()->begin();
-		Singleton<ColorShader>::getPtr()->makeCommand();
-		Singleton<Direct3D>::getPtr()->end();
 	}
 	default:
 	{

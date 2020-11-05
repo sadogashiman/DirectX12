@@ -39,7 +39,7 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	gbvdebug->SetEnableGPUBasedValidation(true);
 #endif // _DEBUG
 
-	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_12_0;
+	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_12_1;
 	HRESULT hr;
 	D3D12_COMMAND_QUEUE_DESC commandqueuedesc;
 	DXGI_SWAP_CHAIN_DESC1 swapchaindesc;
@@ -155,13 +155,22 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	);
 
 	cmdlist_->Close();
+
+	//ビューポートの設定
+	viewport_.Height = kWindow_Height;
+	viewport_.Width = kWindow_Width;
+	viewport_.MaxDepth = kScreen_depth;
+	viewport_.MinDepth = 0.0F;
+	viewport_.TopLeftX = 0.0F;
+	viewport_.TopLeftY = 0.0F;
+
+	scissorrect_.top = 0;
+	scissorrect_.left = 0;
+	scissorrect_.right = static_cast<LONG>(kWindow_Width);
+	scissorrect_.bottom = static_cast<LONG>(kWindow_Height);
 }
 
-void Direct3D::update()
-{
-}
-
-void Direct3D::waiPrevFrame()
+void Direct3D::waitPrevFrame()
 {
 	auto& fence = fence_[frameindex_];
 	const auto currentvalue = ++fencevalue_[frameindex_];
@@ -176,18 +185,6 @@ void Direct3D::waiPrevFrame()
 		fence_[nextindex]->SetEventOnCompletion(finishexpect, fenceevent_);
 		WaitForSingleObject(fenceevent_, kGpuWaitTimeout);
 	}
-	//ビューポートの設定
-	viewport_.Height = kWindow_Height;
-	viewport_.Width = kWindow_Width;
-	viewport_.MaxDepth = kScreen_depth;
-	viewport_.MinDepth = 0.0F;
-	viewport_.TopLeftX = 0.0F;
-	viewport_.TopLeftY = 0.0F;
-
-	scissorrect_.top = 0;
-	scissorrect_.left = 0;
-	scissorrect_.right = static_cast<LONG>(kWindow_Width);
-	scissorrect_.bottom = static_cast<LONG>(kWindow_Height);
 }
 
 void Direct3D::begin()
@@ -245,7 +242,7 @@ void Direct3D::end()
 
 	swapchain_->Present(1, 0);
 
-	waiPrevFrame();
+	waitPrevFrame();
 }
 
 void Direct3D::destroy()

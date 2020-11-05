@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="System">
-      <UniqueIdentifier>{e8d9c7e3-e082-48a2-95a1-a54b2cbd0ad4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sigleton">
       <UniqueIdentifier>{057010d1-147b-4f44-8788-59ae2b17d6a6}</UniqueIdentifier>
     </Filter>
@@ -55,6 +52,18 @@
     <Filter Include="Support\Debug">
       <UniqueIdentifier>{1ed5c5ce-2909-4eab-9ae5-57296398a587}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Application">
+      <UniqueIdentifier>{8bfa52da-42ba-4d03-baa0-d77b1cc771fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Application\System">
+      <UniqueIdentifier>{e8d9c7e3-e082-48a2-95a1-a54b2cbd0ad4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{e2116c67-8743-4acc-a873-a7ee2d900dd8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Timer">
+      <UniqueIdentifier>{88a927ab-54c3-4b94-8c88-e79db2a159db}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -67,7 +76,7 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="System.cpp">
-      <Filter>System</Filter>
+      <Filter>Application\System</Filter>
     </ClCompile>
     <ClCompile Include="Support.cpp">
       <Filter>Support</Filter>
@@ -93,13 +102,19 @@
     <ClCompile Include="Debug.cpp">
       <Filter>Support\Debug</Filter>
     </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Timer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="System.h">
-      <Filter>System</Filter>
+      <Filter>Application\System</Filter>
     </ClInclude>
     <ClInclude Include="DXHelper.h">
       <Filter>Support\Microsoft</Filter>
@@ -134,9 +149,6 @@
     <ClInclude Include="ColorShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
-    <ClInclude Include="State.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="d3dx12.h">
       <Filter>Support\Microsoft</Filter>
     </ClInclude>
@@ -154,6 +166,15 @@
     </ClInclude>
     <ClInclude Include="Debug.h">
       <Filter>Support\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneBase.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Timer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

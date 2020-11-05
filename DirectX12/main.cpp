@@ -15,7 +15,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	result = Singleton<System>::getPtr()->init();
 	if (result)
 	{
-		//é¿çs
 		Singleton<System>::getPtr()->run();
 	}
 

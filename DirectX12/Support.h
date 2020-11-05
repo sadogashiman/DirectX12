@@ -1,5 +1,11 @@
 #pragma once
 
+struct ShaderData
+{
+	byte* data;
+	uint32_t size;
+};
+
 class Support
 {
 private:
@@ -11,6 +17,7 @@ public:
 	~Support();
 
 	static HRESULT createShaderV6(std::filesystem::path ShaderPath, std::wstring Profile, ComPtr<ID3DBlob>& ShaderBlob, ComPtr<ID3DBlob>& ErrorMessage);
+	static HRESULT createShaderForCSOFile(std::filesystem::path ShaderPath, ShaderData** ShaderData);
 	static HRESULT createShader(std::filesystem::path ShdaerPath, const wchar_t* Profile, ComPtr<ID3D10Blob>& ShaderBlob, ComPtr<ID3D10Blob>& ErrorMessage);
 	
 	//create

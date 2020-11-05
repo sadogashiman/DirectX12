@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "ColorShader.h"
-#include "Support.h"
 #include "Singleton.h"
 #include "Direct3D.h"
+#include "DXHelper.h"
 
 ColorShader::ColorShader()
 {
@@ -15,7 +15,8 @@ ColorShader::~ColorShader()
 void ColorShader::init()
 {
 	HRESULT hr;
-
+	ShaderData pixel_;
+	ShaderData vertex;
 	Vertex vertices[] = {
 	{ {  0.0f, 0.25f, 0.5f }, { 1.0f, 0.0f,0.0f,1.0f} },
 	{ { 0.25f,-0.25f, 0.5f }, { 0.0f, 1.0f,0.0f,1.0f} },
@@ -38,19 +39,11 @@ void ColorShader::init()
 	indexbufferview_.Format = DXGI_FORMAT_R32_UINT;
 
 	//シェーダーコンパイル
-	ComPtr<ID3DBlob> errblob;
-	hr = Support::createShaderV6("color_vs.hlsl", L"vs_6_0", vertexshader_, errblob);
-	if (DXC_S_OK!=hr)
-	{
-		OutputDebugStringA((const char*)errblob->GetBufferPointer());
-	}
-	hr = Support::createShaderV6("color_ps.hlsl", L"ps_6_0", pixelshader_, errblob);
-	if (DXC_S_OK != hr)
-	{
-		OutputDebugStringA((const char*)errblob->GetBufferPointer());
-	}
+	ReadDataFromFile(L"color_ps.cso", &pixel_.data, &pixel_.size);
+	ReadDataFromFile(L"color_vs.cso", &vertex.data, &vertex.size);
 
 	//ルートシグネチャの構築
+	ComPtr<ID3D10Blob> errblob;
 	CD3DX12_ROOT_SIGNATURE_DESC rootsigdesc{};
 	rootsigdesc.Init(
 		0,
@@ -60,6 +53,7 @@ void ColorShader::init()
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
 	);
 
+	//ルートシグネチャの作成
 	ComPtr<ID3DBlob> signature;
 	hr = D3D12SerializeRootSignature(&rootsigdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signature, &errblob);
 	if (FAILED(hr))
@@ -67,16 +61,15 @@ void ColorShader::init()
 		throw std::runtime_error("D3D12SerializeRootSignature faild.");
 	}
 
-	//ルートシグネチャの作成
 	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateRootSignature(
 		0,
-		signature->GetBufferPointer(),
-		signature->GetBufferSize(),
+		signature.Get()->GetBufferPointer(),
+		signature.Get()->GetBufferSize(),
 		IID_PPV_ARGS(&rootsignature_)
 	);
 	if (FAILED(hr))
 	{
-		throw std::runtime_error("CreateRootsignature faild.");
+		throw std::runtime_error("CreateRootSignature faild ");
 	}
 
 	//インプットレイアウト
@@ -100,9 +93,14 @@ void ColorShader::init()
 	//パイプラインの生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelinestatedesc{};
 
+	//シグネチャのセット
+	pipelinestatedesc.pRootSignature = rootsignature_.Get();
+
 	//シェーダーのセット
-	pipelinestatedesc.VS = CD3DX12_SHADER_BYTECODE(vertexshader_.Get());
-	pipelinestatedesc.PS = CD3DX12_SHADER_BYTECODE(pixelshader_.Get());
+	pipelinestatedesc.VS.pShaderBytecode = vertex.data;
+	pipelinestatedesc.VS.BytecodeLength = vertex.size;
+	pipelinestatedesc.PS.pShaderBytecode = pixel_.data;
+	pipelinestatedesc.PS.BytecodeLength = pixel_.size;
 
 	//ブレンドステートのセット
 	pipelinestatedesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -133,7 +131,6 @@ void ColorShader::init()
 	{
 		throw std::runtime_error("CreateGraphicsPipelineState faild.");
 	}
-
 }
 
 void ColorShader::destroy()

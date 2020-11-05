@@ -52,6 +52,9 @@
     <Filter Include="Support\Lua">
       <UniqueIdentifier>{0466ec65-3f6f-4834-8539-5fb723fd2492}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Support\Debug">
+      <UniqueIdentifier>{1ed5c5ce-2909-4eab-9ae5-57296398a587}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -87,11 +90,11 @@
     <ClCompile Include="ColorShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
+    <ClCompile Include="Debug.cpp">
+      <Filter>Support\Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Singleton.h">
-      <Filter>Sigleton</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -146,17 +149,25 @@
     <ClInclude Include="error.h">
       <Filter>Support</Filter>
     </ClInclude>
+    <ClInclude Include="Singleton.h">
+      <Filter>Sigleton</Filter>
+    </ClInclude>
+    <ClInclude Include="Debug.h">
+      <Filter>Support\Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="InitWindow.lua">
       <Filter>リソース ファイル\Lua</Filter>
     </None>
-    <None Include="color_ps.hlsl">
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="color_ps.hlsl">
       <Filter>リソース ファイル\HLSL\Color</Filter>
-    </None>
-    <None Include="color_vs.hlsl">
+    </FxCompile>
+    <FxCompile Include="color_vs.hlsl">
       <Filter>リソース ファイル\HLSL\Color</Filter>
-    </None>
+    </FxCompile>
   </ItemGroup>
 </Project>

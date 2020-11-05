@@ -39,7 +39,7 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	gbvdebug->SetEnableGPUBasedValidation(true);
 #endif // _DEBUG
 
-	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_12_1;
+	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0;
 	HRESULT hr;
 	D3D12_COMMAND_QUEUE_DESC commandqueuedesc;
 	DXGI_SWAP_CHAIN_DESC1 swapchaindesc;
@@ -82,7 +82,6 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 		IID_PPV_ARGS(&device_)
 	);
 	ThrowIfFailed(hr);
-
 
 	//コマンドキューを初期化
 	ZeroMemory(&commandqueuedesc, sizeof(commandqueuedesc));
@@ -189,7 +188,6 @@ void Direct3D::waiPrevFrame()
 	scissorrect_.left = 0;
 	scissorrect_.right = static_cast<LONG>(kWindow_Width);
 	scissorrect_.bottom = static_cast<LONG>(kWindow_Height);
-
 }
 
 void Direct3D::begin()
@@ -317,7 +315,6 @@ void Direct3D::createDescriptorHeaps()
 
 	//サイズを取得
 	depthstencildescriptionsize_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-
 }
 
 void Direct3D::prepareRenderTargetView()

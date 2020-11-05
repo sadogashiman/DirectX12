@@ -15,7 +15,7 @@ ColorShader::~ColorShader()
 void ColorShader::init()
 {
 	HRESULT hr;
-	ShaderData pixel_;
+	ShaderData pixel;
 	ShaderData vertex;
 	Vertex vertices[] = {
 	{ {  0.0f, 0.25f, 0.5f }, { 1.0f, 0.0f,0.0f,1.0f} },
@@ -39,7 +39,7 @@ void ColorShader::init()
 	indexbufferview_.Format = DXGI_FORMAT_R32_UINT;
 
 	//シェーダーコンパイル
-	ReadDataFromFile(L"color_ps.cso", &pixel_.data, &pixel_.size);
+	ReadDataFromFile(L"color_ps.cso", &pixel.data, &pixel.size);
 	ReadDataFromFile(L"color_vs.cso", &vertex.data, &vertex.size);
 
 	//ルートシグネチャの構築
@@ -99,8 +99,10 @@ void ColorShader::init()
 	//シェーダーのセット
 	pipelinestatedesc.VS.pShaderBytecode = vertex.data;
 	pipelinestatedesc.VS.BytecodeLength = vertex.size;
-	pipelinestatedesc.PS.pShaderBytecode = pixel_.data;
-	pipelinestatedesc.PS.BytecodeLength = pixel_.size;
+	pipelinestatedesc.PS.pShaderBytecode = pixel.data;
+	pipelinestatedesc.PS.BytecodeLength = pixel.size;
+
+
 
 	//ブレンドステートのセット
 	pipelinestatedesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -131,6 +133,9 @@ void ColorShader::init()
 	{
 		throw std::runtime_error("CreateGraphicsPipelineState faild.");
 	}
+
+	SAFE_DELETE(vertex.data);
+	SAFE_DELETE(pixel.data);
 }
 
 void ColorShader::destroy()

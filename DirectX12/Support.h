@@ -1,4 +1,6 @@
 #pragma once
+#include "error.h"
+#include "release.h"
 
 struct ShaderData
 {

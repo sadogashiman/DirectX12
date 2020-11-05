@@ -39,7 +39,7 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	gbvdebug->SetEnableGPUBasedValidation(true);
 #endif // _DEBUG
 
-	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_11_0;
+	D3D_FEATURE_LEVEL featurelevel = D3D_FEATURE_LEVEL_12_0;
 	HRESULT hr;
 	D3D12_COMMAND_QUEUE_DESC commandqueuedesc;
 	DXGI_SWAP_CHAIN_DESC1 swapchaindesc;

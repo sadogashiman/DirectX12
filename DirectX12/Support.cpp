@@ -32,7 +32,6 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 		//throw std::exception("Mesh Shaders aren't supported!");
 	}
 
-
 	//パスが有効か確認
 	if (!std::filesystem::exists(ShaderPath))
 	{

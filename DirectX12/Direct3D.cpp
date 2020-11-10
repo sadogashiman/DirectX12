@@ -19,10 +19,11 @@ Direct3D::~Direct3D()
 
 void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vsync, const bool FullScreen, const float ScreenDepth, const float ScreenNear, HWND Hwnd)
 {
-#ifdef _DEBUG
+	UINT dxgidebugflag = 0;
+
+#ifdef false
 	//デバッグ時のみデバッグレイヤーを有効化する
 	//デバイスの作成後に有効にすると意味がないのでデバイスの作成前に設定する
-	UINT dxgidebugflag = 0;
 	ComPtr<ID3D12Debug>debugcontroller;
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(debugcontroller.ReleaseAndGetAddressOf()))))
 	{
@@ -127,9 +128,6 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	hr = swapchain.As(&swapchain_); //IDXGISwapChain4取得
 	ThrowIfFailed(hr);
 
-	//バックバッファの数を取得
-	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
-
 	//各ディスクリプターヒープの作成
 	createDescriptorHeaps();
 
@@ -159,7 +157,7 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	//ビューポートの設定
 	viewport_.Height = kWindow_Height;
 	viewport_.Width = kWindow_Width;
-	viewport_.MaxDepth = kScreen_depth;
+	viewport_.MaxDepth = 1.0F;
 	viewport_.MinDepth = 0.0F;
 	viewport_.TopLeftX = 0.0F;
 	viewport_.TopLeftY = 0.0F;
@@ -189,10 +187,10 @@ void Direct3D::waitPrevFrame()
 
 void Direct3D::begin()
 {
-	frameindex_ = swapchain_->GetCurrentBackBufferIndex();
+	frameindex_ = swapchain_.Get()->GetCurrentBackBufferIndex();
 
 	//コマンドリセット
-	cmdallocator_[frameindex_]->Reset();
+	cmdallocator_[frameindex_].Get()->Reset();
 	cmdlist_->Reset(cmdallocator_[frameindex_].Get(), nullptr);
 
 	//スワップチェイン表示可能からレンダーターゲット描画可能へ

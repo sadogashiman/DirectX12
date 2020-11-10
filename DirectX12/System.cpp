@@ -5,7 +5,6 @@
 #include "DirectInput.h"
 #include "DXHelper.h"
 #include "Polygon.h"
-#include "ColorShader.h"
 #include "Game.h"
 #include "Timer.h"
 
@@ -27,7 +26,7 @@ bool System::init()
 	//Windowsを初期化
 	initWindows();
 
-
+	//DirectInput初期化
 	result = Singleton<DirectInput>::getPtr()->init();
 	if (!result)
 	{
@@ -35,8 +34,10 @@ bool System::init()
 		return false;
 	}
 
+	//DirectX初期化
 	Singleton<Direct3D>::getPtr()->init(kScreenWidth, kScreenHeight,kFullScreen, kVsync, kScreen_depth, kScreen_near, hwnd_);
 
+	//sceneを初期化
 	scene_.reset(new Game);
 	if (!scene_.get()->init())
 	{
@@ -44,6 +45,7 @@ bool System::init()
 		return false;
 	}
 
+	//タイマーの状態を設定
 	Singleton<Timer>::getPtr()->setTimerStatus(true);
 
 	return true;
@@ -122,11 +124,9 @@ bool System::update()
 bool System::render()
 {
 	bool result;
-	Singleton<Direct3D>::getPtr()->begin();
 	result = scene_.get()->render();
 	if (!result)
 		return result;
-	Singleton<Direct3D>::getPtr()->end();
 
 	return true;
 }
@@ -189,10 +189,6 @@ void System::initWindows()
 
 	//ウィンドウクラスを登録
 	RegisterClassEx(&wc);
-
-	//スクリーンサイズを取得
-	wnddata.width = GetSystemMetrics(SM_CXSCREEN);
-	wnddata.height = GetSystemMetrics(SM_CYSCREEN);
 
 	//ウィンドウをセットアップ
 	if (kFullScreen)

@@ -2,7 +2,7 @@
 #include "Model.h"
 const bool kUseHardwareAdapter = true;	//ハードウェアを使用するかどうか
 const unsigned int kGpuWaitTimeout = (10 * 1000);//10s
-const unsigned int kBufferCount = 2U;
+const unsigned int kBufferCount = 2;
 const float kClearColor[4] = { 0.0F,0.0F,1.0F,1.0F };
 
 class Direct3D

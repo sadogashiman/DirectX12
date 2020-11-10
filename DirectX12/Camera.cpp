@@ -30,6 +30,7 @@ void Camera::init(XMFLOAT3 Position)
 void Camera::update(const float ElapsedSecond)
 {
 	XMFLOAT3 move;
+	ZeroMemory(&move,sizeof(move));
 	auto input = Singleton<DirectInput>::getPtr();
 
 	if (input->isKeyState(DIK_A))

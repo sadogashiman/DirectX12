@@ -24,32 +24,35 @@
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="Direct3D.cpp" />
     <ClCompile Include="DirectInput.cpp" />
+    <ClCompile Include="DirectX.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Model.cpp" />
-    <ClCompile Include="Polygon.cpp" />
     <ClCompile Include="Support.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Singleton.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ColorShader.h" />
+    <ClInclude Include="D3D12BookUtil.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="DescriptorManager.h" />
     <ClInclude Include="Direct3D.h" />
     <ClInclude Include="DirectInput.h" />
+    <ClInclude Include="DirectX.h" />
     <ClInclude Include="DXHelper.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="InputKeyCode.h" />
     <ClInclude Include="lua_Helper.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="Polygon.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Span.h" />
     <ClInclude Include="Support.h" />
@@ -57,6 +60,7 @@
     <ClInclude Include="release.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SwapChain.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>

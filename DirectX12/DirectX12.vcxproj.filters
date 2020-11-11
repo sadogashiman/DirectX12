@@ -64,6 +64,12 @@
     <Filter Include="Timer">
       <UniqueIdentifier>{88a927ab-54c3-4b94-8c88-e79db2a159db}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Support\Book">
+      <UniqueIdentifier>{7ed0042a-9948-4852-b852-15734449a57c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectX\SwapChain">
+      <UniqueIdentifier>{cfb2dd29-ce3b-4300-bf9a-d9a8d6246580}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -93,9 +99,6 @@
     <ClCompile Include="Direct3D.cpp">
       <Filter>DirectX\Direct3D</Filter>
     </ClCompile>
-    <ClCompile Include="Polygon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="ColorShader.cpp">
       <Filter>Shader</Filter>
     </ClCompile>
@@ -107,6 +110,12 @@
     </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="SwapChain.cpp">
+      <Filter>DirectX\SwapChain</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectX.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -143,9 +152,6 @@
     <ClInclude Include="Object.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Polygon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="ColorShader.h">
       <Filter>Shader</Filter>
     </ClInclude>
@@ -175,6 +181,18 @@
     </ClInclude>
     <ClInclude Include="Timer.h">
       <Filter>Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D12BookUtil.h">
+      <Filter>Support\Book</Filter>
+    </ClInclude>
+    <ClInclude Include="DescriptorManager.h">
+      <Filter>Support\Book</Filter>
+    </ClInclude>
+    <ClInclude Include="SwapChain.h">
+      <Filter>DirectX\SwapChain</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectX.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

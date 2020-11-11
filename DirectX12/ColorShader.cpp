@@ -140,7 +140,7 @@ void ColorShader::init()
 
 void ColorShader::destroy()
 {
-	auto index = Singleton<Direct3D>::getPtr()->getSwapChain()->GetCurrentBackBufferIndex();
+	auto index = Singleton<Direct3D>::getPtr()->getSwapChain().get()->getCurrentBackBufferIndex();
 	auto fence = Singleton<Direct3D>::getPtr()->getFence()[index];
 	auto value = ++Singleton<Direct3D>::getPtr()->getFenceValue()[index];
 	Singleton<Direct3D>::getPtr()->getCommandQueue()->Signal(fence.Get(), value);

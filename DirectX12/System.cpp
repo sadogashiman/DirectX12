@@ -4,7 +4,6 @@
 #include "Direct3D.h"
 #include "DirectInput.h"
 #include "DXHelper.h"
-#include "Polygon.h"
 #include "Game.h"
 #include "Timer.h"
 

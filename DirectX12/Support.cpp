@@ -54,7 +54,8 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	std::vector<char> data;
 
 	//配列サイズ変更
-	data.resize(ifs.seekg(0, ifs.end).tellg());
+	UINT size = static_cast<UINT>(ifs.seekg(0, ifs.end).tellg());
+	data.resize(size);
 
 	//ポインタを最初に戻してデータを取得
 	ifs.seekg(0, ifs.beg).read(data.data(), data.size());
@@ -96,7 +97,7 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 
 HRESULT Support::createShaderForCSOFile(std::filesystem::path ShaderPath, ShaderData** ShaderData)
 {
-	HRESULT hr;
+	//HRESULT hr;
 
 	//パスが有効か確認
 	if (!std::filesystem::exists(ShaderPath))

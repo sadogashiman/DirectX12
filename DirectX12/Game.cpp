@@ -16,11 +16,9 @@ SceneBase* Game::update()
 
 bool Game::render()
 {
-	Singleton<Direct3D>::getPtr()->begin();
 
 	Singleton<ColorShader>::getPtr()->makeCommand();
 
-	Singleton<Direct3D>::getPtr()->end();
 
 	return true;
 }

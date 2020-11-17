@@ -194,8 +194,8 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	cmdlist_->Close();
 
 	//ビューポートの設定
-	viewport_.Height = height_;
-	viewport_.Width = width_;
+	viewport_.Height = static_cast<float>(height_);
+	viewport_.Width = static_cast<float>(width_);
 	viewport_.MaxDepth = 1.0F;
 	viewport_.MinDepth = 0.0F;
 	viewport_.TopLeftX = 0.0F;

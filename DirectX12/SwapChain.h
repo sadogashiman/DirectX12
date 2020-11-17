@@ -28,6 +28,7 @@ public:
 	void resizeBuffers(UINT Width, UINT Height);
 
 	//get
+	//inline ComPtr<IDXGISwapChain4> getSwapChain() { return swapchain_; }
 	inline UINT getCurrentBackBufferIndex()const { return swapchain_->GetCurrentBackBufferIndex(); }
 	inline HRESULT present(UINT SyncInterval, UINT Flag) { return swapchain_->Present(SyncInterval, Flag); }
 	inline DescriptorHandle getCurrentRTV()const { return imageRTV_[getCurrentBackBufferIndex()]; }

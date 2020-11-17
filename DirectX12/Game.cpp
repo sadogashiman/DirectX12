@@ -2,10 +2,10 @@
 #include "Game.h"
 #include "ColorShader.h"
 #include "Singleton.h"
+#include "HDRShader.h"
 
 bool Game::init()
 {
-	Singleton<ColorShader>::getPtr()->init();
 	return true;
 }
 
@@ -17,13 +17,10 @@ SceneBase* Game::update()
 bool Game::render()
 {
 
-	Singleton<ColorShader>::getPtr()->makeCommand();
-
 
 	return true;
 }
 
 void Game::destroy()
 {
-	Singleton<ColorShader>::getPtr()->destroy();
 }

@@ -24,8 +24,16 @@
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="Direct3D.cpp" />
     <ClCompile Include="DirectInput.cpp" />
-    <ClCompile Include="DirectX.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HDRShader.cpp" />
+    <ClCompile Include="ImguiManager.cpp" />
+    <ClCompile Include="imgui_helper.cpp" />
+    <ClCompile Include="include\examples\imgui_impl_dx12.cpp" />
+    <ClCompile Include="include\examples\imgui_impl_win32.cpp" />
+    <ClCompile Include="include\imgui.cpp" />
+    <ClCompile Include="include\imgui_demo.cpp" />
+    <ClCompile Include="include\imgui_draw.cpp" />
+    <ClCompile Include="include\imgui_widgets.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Support.cpp" />
     <ClCompile Include="main.cpp" />
@@ -46,14 +54,26 @@
     <ClInclude Include="DescriptorManager.h" />
     <ClInclude Include="Direct3D.h" />
     <ClInclude Include="DirectInput.h" />
-    <ClInclude Include="DirectX.h" />
     <ClInclude Include="DXHelper.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="HDRShader.h" />
+    <ClInclude Include="ImguiManager.h" />
+    <ClInclude Include="imgui_helper.h" />
+    <ClInclude Include="include\examples\imgui_impl_dx12.h" />
+    <ClInclude Include="include\examples\imgui_impl_win32.h" />
+    <ClInclude Include="include\imconfig.h" />
+    <ClInclude Include="include\imgui.h" />
+    <ClInclude Include="include\imgui_internal.h" />
+    <ClInclude Include="include\imstb_rectpack.h" />
+    <ClInclude Include="include\imstb_textedit.h" />
+    <ClInclude Include="include\imstb_truetype.h" />
     <ClInclude Include="InputKeyCode.h" />
     <ClInclude Include="lua_Helper.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="Object.h" />
+    <ClInclude Include="ModelData.h" />
+    <ClInclude Include="Resource\TeapotModel.h" />
     <ClInclude Include="SceneBase.h" />
+    <ClInclude Include="ShaderBase.h" />
     <ClInclude Include="Span.h" />
     <ClInclude Include="Support.h" />
     <ClInclude Include="error.h" />
@@ -69,25 +89,21 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="color_ps.hlsl">
+    <FxCompile Include="Resource\Shader\color_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.3</ShaderModel>
-      <FileType>Document</FileType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.3</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.4</ShaderModel>
     </FxCompile>
-    <FxCompile Include="color_vs.hlsl">
+    <FxCompile Include="Resource\Shader\color_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">6.0</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.3</ShaderModel>
-      <FileType>Document</FileType>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.4</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\Shader\model_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.4</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\Shader\model_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.4</ShaderModel>
     </FxCompile>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -166,6 +182,7 @@
       <ForcedIncludeFiles>stdafx.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\Game\source\repos\DirectX12\DirectX12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -222,12 +239,12 @@
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\directxtex_desktop_2017.2020.9.30.1\build\native\directxtex_desktop_2017.targets" Condition="Exists('..\packages\directxtex_desktop_2017.2020.9.30.1\build\native\directxtex_desktop_2017.targets')" />
+    <Import Project="..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets" Condition="Exists('..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\directxtex_desktop_2017.2020.9.30.1\build\native\directxtex_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2017.2020.9.30.1\build\native\directxtex_desktop_2017.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_2017.2020.11.12.1\build\native\directxtex_desktop_2017.targets'))" />
   </Target>
 </Project>

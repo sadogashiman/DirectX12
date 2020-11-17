@@ -73,7 +73,7 @@ bool Timer::fpsControl(FrameRate Rate)
 
 void Timer::destroy()
 {
-	//ğ“ú‚ğ’â~
+	//‹@”\‚ğ’â~
 	running_ = false;
 	stopwatch_ = false;
 }

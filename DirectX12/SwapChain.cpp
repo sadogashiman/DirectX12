@@ -28,13 +28,13 @@ SwapChain::SwapChain(ComPtr<IDXGISwapChain1> Swapchain, std::shared_ptr<Descript
 
 	   imageRTV_[i] = HeapRTV->Alloc();
 
-		// Swapchain イメージの RTV 生成.
+		// Swapchain イメージの RTV 生成
 		hr = swapchain_->GetBuffer(i, IID_PPV_ARGS(&images_[i]));
 		ThrowIfFailed(hr);
 		device->CreateRenderTargetView(images_[i].Get(), nullptr, imageRTV_[i]);
 	}
 
-	// フォーマットに応じてカラースペースを設定.
+	// フォーマットに応じてカラースペースを設定
 	DXGI_COLOR_SPACE_TYPE colorspace;
 	switch (desc_.Format)
 	{
@@ -101,18 +101,18 @@ void SwapChain::setFullScreen(bool FullScreen)
 void SwapChain::waitPreviousFrame(ComPtr<ID3D12CommandQueue> CommandQueue, int FrameIndex, DWORD GpuTimeOut)
 {
 	auto fence = fences_[FrameIndex];
-	// 現在のフェンスに GPU が到達後設定される値をセット.
+	// 現在のフェンスに GPU が到達後設定される値をセット
 	auto value = ++fencevalues_[FrameIndex];
 	CommandQueue->Signal(fence.Get(), value);
 
-	// 次フレームで処理するコマンドの実行完了を待機する.
+	// 次フレームで処理するコマンドの実行完了を待機する
 	auto nextindex = getCurrentBackBufferIndex();
 	auto finishvalue = fencevalues_[nextindex];
 	fence = fences_[nextindex];
 	value = fence->GetCompletedValue();
 	if (value < finishvalue)
 	{
-		// 未完了のためイベントで待機.
+		// 未完了のためイベントで待機
 		fence->SetEventOnCompletion(finishvalue, waithandle_);
 		WaitForSingleObject(waithandle_, GpuTimeOut);
 	}
@@ -120,7 +120,7 @@ void SwapChain::waitPreviousFrame(ComPtr<ID3D12CommandQueue> CommandQueue, int F
 
 void SwapChain::resizeBuffers(UINT Width, UINT Height)
 {
-	// リサイズのためにいったん解放.
+	// リサイズのためにいったん解放
 	for (auto& v : images_) {
 		v.Reset();
 	}
@@ -130,7 +130,7 @@ void SwapChain::resizeBuffers(UINT Width, UINT Height)
 	);
 	ThrowIfFailed(hr);
 
-	// イメージを取り直して RTV を再生成.
+	// イメージを取り直して RTV を再生成
 	ComPtr<ID3D12Device> device;
 	swapchain_->GetDevice(IID_PPV_ARGS(&device));
 	for (UINT i = 0; i < desc_.BufferCount; ++i) {

@@ -75,12 +75,9 @@ public:
 	void destroy();
 	void finishCommandList(ComPtr<ID3D12GraphicsCommandList>& Command);
 
-
 	//windowŠÖŒW
 	void ToggleFullscreen();
 	void OnSizeChanged(UINT width, UINT height, bool isMinimized);
-
-
 
 	//create
 	ComPtr<ID3D12Resource1> createResource(const CD3DX12_RESOURCE_DESC& Desc,D3D12_RESOURCE_STATES ResourceStates,const D3D12_CLEAR_VALUE* ClearValue,D3D12_HEAP_TYPE HeapType);
@@ -89,11 +86,14 @@ public:
 
 	void writeToUploadHeapMemory(ID3D12Resource1* Resource, uint32_t Size, const void* Data);
 
+	//set
+	inline void setFrameIndex(const UINT FrameIndex) { frameindex_ = FrameIndex; }
 	
 	//get
 	inline std::shared_ptr<SwapChain> getSwapChain() { return swapchain_; }
 	inline ID3D12Device* getDevice()const { return device_.Get(); }
 	inline ID3D12CommandQueue* getCommandQueue()const { return cmdqueue_.Get(); }
+	inline std::vector<ComPtr<ID3D12CommandAllocator>> getCommandAllocatorVector()const { return cmdallocator_; }
 	inline ComPtr<ID3D12GraphicsCommandList> getCommandList(){ return cmdlist_; }
 	inline CD3DX12_VIEWPORT getViewport()const { return viewport_; }
 	inline CD3DX12_RECT getScissorRects()const { return scissorrect_; }
@@ -101,8 +101,9 @@ public:
 	inline std::vector<ComPtr<ID3D12Fence1>> getFence() { return fence_; }
 	inline std::vector<unsigned long long >getFenceValue() { return fencevalue_; }
 	inline std::shared_ptr<DescriptorManager> GetDescriptorManager() { return heap_; }
-
-
-
+	inline UINT getFrameIndex()const { return frameindex_; }
+	inline DescriptorHandle getDefaultDepthDSV()const { return defaultdepthdsv_; }
+	inline UINT getWidth() { return width_; }
+	inline UINT getHeight() { return height_; }
 };
 

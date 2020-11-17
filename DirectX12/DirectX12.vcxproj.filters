@@ -70,6 +70,12 @@
     <Filter Include="DirectX\SwapChain">
       <UniqueIdentifier>{cfb2dd29-ce3b-4300-bf9a-d9a8d6246580}</UniqueIdentifier>
     </Filter>
+    <Filter Include="リソース ファイル\HLSL\Model">
+      <UniqueIdentifier>{8f6b6f7e-c81f-49b3-a683-d72e14b57c6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Imgui">
+      <UniqueIdentifier>{6298e1a9-e879-4fcf-9ce1-0a387173417a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -86,9 +92,6 @@
     </ClCompile>
     <ClCompile Include="Support.cpp">
       <Filter>Support</Filter>
-    </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Support\Microsoft</Filter>
     </ClCompile>
     <ClCompile Include="DirectInput.cpp">
       <Filter>Input</Filter>
@@ -114,7 +117,34 @@
     <ClCompile Include="SwapChain.cpp">
       <Filter>DirectX\SwapChain</Filter>
     </ClCompile>
-    <ClCompile Include="DirectX.cpp">
+    <ClCompile Include="HDRShader.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui_helper.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui_demo.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui_draw.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui_widgets.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="include\examples\imgui_impl_dx12.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="include\examples\imgui_impl_win32.cpp">
+      <Filter>Imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImguiManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -131,9 +161,6 @@
     <ClInclude Include="Support.h">
       <Filter>Support</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Support\Microsoft</Filter>
-    </ClInclude>
     <ClInclude Include="Span.h">
       <Filter>Support\Microsoft</Filter>
     </ClInclude>
@@ -148,9 +175,6 @@
     </ClInclude>
     <ClInclude Include="Direct3D.h">
       <Filter>DirectX\Direct3D</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ColorShader.h">
       <Filter>Shader</Filter>
@@ -191,22 +215,70 @@
     <ClInclude Include="SwapChain.h">
       <Filter>DirectX\SwapChain</Filter>
     </ClInclude>
-    <ClInclude Include="DirectX.h">
+    <ClInclude Include="HDRShader.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelData.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource\TeapotModel.h">
+      <Filter>Support\Microsoft</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui_helper.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imconfig.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui_internal.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imstb_rectpack.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imstb_textedit.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imstb_truetype.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\examples\imgui_impl_dx12.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="include\examples\imgui_impl_win32.h">
+      <Filter>Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImguiManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="InitWindow.lua">
       <Filter>リソース ファイル\Lua</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="color_ps.hlsl">
+    <FxCompile Include="Resource\Shader\color_ps.hlsl">
       <Filter>リソース ファイル\HLSL\Color</Filter>
     </FxCompile>
-    <FxCompile Include="color_vs.hlsl">
+    <FxCompile Include="Resource\Shader\color_vs.hlsl">
       <Filter>リソース ファイル\HLSL\Color</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shader\model_ps.hlsl">
+      <Filter>リソース ファイル\HLSL\Model</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\Shader\model_vs.hlsl">
+      <Filter>リソース ファイル\HLSL\Model</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -14,23 +14,23 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 {
 	HRESULT hr;
 
-	//シェーダーモデル6.5をサポートしているかチェック
-	D3D12_FEATURE_DATA_SHADER_MODEL shadermodel = { D3D_SHADER_MODEL_6_5 };
-	if (FAILED(Singleton<Direct3D>::getPtr()->getDevice()->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shadermodel, sizeof(shadermodel)))
-		||(shadermodel.HighestShaderModel<D3D_SHADER_MODEL_6_5))
-	{
-		OutputDebugString("ERROR: Shader Model 6.5 is not supported\n");
-		//throw std::exception("Shader Model 6.5 not Supported");
-	}
+	////シェーダーモデル6.5をサポートしているかチェック
+	//D3D12_FEATURE_DATA_SHADER_MODEL shadermodel = { D3D_SHADER_MODEL_6_5 };
+	//if (FAILED(Singleton<Direct3D>::getPtr()->getDevice()->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shadermodel, sizeof(shadermodel)))
+	//	||(shadermodel.HighestShaderModel<D3D_SHADER_MODEL_6_5))
+	//{
+	//	OutputDebugString("ERROR: Shader Model 6.5 is not supported\n");
+	//	//throw std::exception("Shader Model 6.5 not Supported");
+	//}
 
-	//Meshシェーダーをサポートしているかチェック
-	D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
-	if (FAILED(Singleton<Direct3D>::getPtr()->getDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features)))
-		|| (features.MeshShaderTier == D3D12_MESH_SHADER_TIER_NOT_SUPPORTED))
-	{
-		OutputDebugStringA("ERROR: Mesh Shaders aren't supported!\n");
-		//throw std::exception("Mesh Shaders aren't supported!");
-	}
+	////Meshシェーダーをサポートしているかチェック
+	//D3D12_FEATURE_DATA_D3D12_OPTIONS7 features = {};
+	//if (FAILED(Singleton<Direct3D>::getPtr()->getDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features)))
+	//	|| (features.MeshShaderTier == D3D12_MESH_SHADER_TIER_NOT_SUPPORTED))
+	//{
+	//	OutputDebugStringA("ERROR: Mesh Shaders aren't supported!\n");
+	//	//throw std::exception("Mesh Shaders aren't supported!");
+	//}
 
 	//パスが有効か確認
 	if (!std::filesystem::exists(ShaderPath))

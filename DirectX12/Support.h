@@ -43,6 +43,3 @@ inline void setNameIndexed(ID3D12Object* Object, LPCWSTR Name, UINT Index)
 	}
 }
 #endif
-
-#define NAME_D3D12_OBJECT(x) setName((x).Get(),L#x)
-#define NAME_D3D12_OBJECT_INDEXED(x,n)setNameIndexed((x)[n].Get(),L#x,n)

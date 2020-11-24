@@ -76,6 +76,15 @@
     <Filter Include="Imgui">
       <UniqueIdentifier>{6298e1a9-e879-4fcf-9ce1-0a387173417a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\Color">
+      <UniqueIdentifier>{1943399e-c792-4199-89c1-19826bb33728}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\HDR">
+      <UniqueIdentifier>{55c1a9fd-13e4-4b4e-aad1-a47bcf839ca8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loader">
+      <UniqueIdentifier>{f4196ea3-4976-4f36-9392-661da6e7778a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -102,9 +111,6 @@
     <ClCompile Include="Direct3D.cpp">
       <Filter>DirectX\Direct3D</Filter>
     </ClCompile>
-    <ClCompile Include="ColorShader.cpp">
-      <Filter>Shader</Filter>
-    </ClCompile>
     <ClCompile Include="Debug.cpp">
       <Filter>Support\Debug</Filter>
     </ClCompile>
@@ -116,9 +122,6 @@
     </ClCompile>
     <ClCompile Include="SwapChain.cpp">
       <Filter>DirectX\SwapChain</Filter>
-    </ClCompile>
-    <ClCompile Include="HDRShader.cpp">
-      <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
       <Filter>ソース ファイル</Filter>
@@ -144,7 +147,13 @@
     <ClCompile Include="include\examples\imgui_impl_win32.cpp">
       <Filter>Imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ImguiManager.cpp">
+    <ClCompile Include="ColorShader.cpp">
+      <Filter>Shader\Color</Filter>
+    </ClCompile>
+    <ClCompile Include="HDRShader.cpp">
+      <Filter>Shader\HDR</Filter>
+    </ClCompile>
+    <ClCompile Include="Loader.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -175,9 +184,6 @@
     </ClInclude>
     <ClInclude Include="Direct3D.h">
       <Filter>DirectX\Direct3D</Filter>
-    </ClInclude>
-    <ClInclude Include="ColorShader.h">
-      <Filter>Shader</Filter>
     </ClInclude>
     <ClInclude Include="d3dx12.h">
       <Filter>Support\Microsoft</Filter>
@@ -214,9 +220,6 @@
     </ClInclude>
     <ClInclude Include="SwapChain.h">
       <Filter>DirectX\SwapChain</Filter>
-    </ClInclude>
-    <ClInclude Include="HDRShader.h">
-      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="ShaderBase.h">
       <Filter>ヘッダー ファイル</Filter>
@@ -257,8 +260,14 @@
     <ClInclude Include="include\examples\imgui_impl_win32.h">
       <Filter>Imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ImguiManager.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="ColorShader.h">
+      <Filter>Shader\Color</Filter>
+    </ClInclude>
+    <ClInclude Include="HDRShader.h">
+      <Filter>Shader\HDR</Filter>
+    </ClInclude>
+    <ClInclude Include="Loader.h">
+      <Filter>Loader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

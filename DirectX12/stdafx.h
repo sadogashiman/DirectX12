@@ -34,6 +34,7 @@
 #include <dxcapi.h>
 #include "d3dx12.h"
 #include "dxc\Support\ErrorCodes.h"
+#include "DirectXTex.h"
 
 //LuaŠÖŒW
 #include <lua.hpp>
@@ -52,6 +53,8 @@
 #include <string>
 #include <filesystem>
 #include <unordered_set>
+#include <array>
+#include <unordered_map>
 
 //******************************
 //@@		ƒŠƒ“ƒN

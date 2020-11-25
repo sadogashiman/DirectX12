@@ -134,8 +134,6 @@ HRESULT Support::createShader(std::filesystem::path ShaderPath, const wchar_t* P
 	return hr;
 }
 
-
-
 _Use_decl_annotations_
 void Support::getHardwareAdapter(IDXGIFactory1* Factory, IDXGIAdapter1** Adapter, bool RequestHighPerformanceAdapter)
 {

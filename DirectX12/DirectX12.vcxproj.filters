@@ -221,9 +221,6 @@
     <ClInclude Include="SwapChain.h">
       <Filter>DirectX\SwapChain</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderBase.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="ModelData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

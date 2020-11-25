@@ -39,7 +39,6 @@
 //LuaŠÖŒW
 #include <lua.hpp>
 
-
 //stdŠÖŒW
 #include <fstream>
 #include <vector>

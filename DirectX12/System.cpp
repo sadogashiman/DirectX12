@@ -6,7 +6,11 @@
 #include "DXHelper.h"
 #include "Game.h"
 #include "Timer.h"
+#include "imgui.h"
+#include "examples\imgui_impl_dx12.h"
+#include "examples\imgui_impl_win32.h"
 
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 System::System()
 {
@@ -89,6 +93,7 @@ void System::run()
 
 void System::destroy()
 {
+	scene_.get()->destroy();
 }
 
 bool System::update()
@@ -290,6 +295,10 @@ LRESULT CALLBACK System::MessageHandler(HWND hWnd, UINT uMessage, WPARAM wParam,
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT uMessage, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, uMessage, wParam, lParam))
+		return TRUE;
+
+
 	switch (uMessage)
 	{
 	case WM_DESTROY:

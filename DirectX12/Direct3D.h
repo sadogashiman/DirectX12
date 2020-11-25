@@ -30,9 +30,10 @@ private:
 	ComPtr<ID3D12GraphicsCommandList> cmdlist_;				//レンダリング用のコマンドリストのカプセル化
 	ComPtr<ID3D12Resource1> depthbuffer_;
 
-	//IDXGI
+	
 	CD3DX12_VIEWPORT viewport_;								//ビューポート
 	CD3DX12_RECT scissorrect_;
+	DXGI_FORMAT surfaceformat_;
 
 	//同期関係
 	std::vector<ComPtr<ID3D12Fence1>> fence_;				//CPUとGPUの同期に使用されるオブジェクトを表す
@@ -58,6 +59,8 @@ private:
 	HANDLE waitfence_;
 
 	bool isallowtearing_;
+	float clearcolor[4];
+
 	void waitPrevFrame();
 	void waitForIdleGPU();
 
@@ -88,6 +91,8 @@ public:
 
 	//set
 	inline void setFrameIndex(const UINT FrameIndex) { frameindex_ = FrameIndex; }
+	inline void setClearColor(const float NewClearColor[]) { memcpy(clearcolor, NewClearColor, sizeof(clearcolor)); }
+	inline void setClearColor(const float Red, const float Green, const float Blue, const float Alpha = 1.0F) { clearcolor[0] = Red; clearcolor[1] = Green; clearcolor[2] = Blue; clearcolor[3] = Alpha; }
 	
 	//get
 	inline std::shared_ptr<SwapChain> getSwapChain() { return swapchain_; }
@@ -105,5 +110,7 @@ public:
 	inline DescriptorHandle getDefaultDepthDSV()const { return defaultdepthdsv_; }
 	inline UINT getWidth() { return width_; }
 	inline UINT getHeight() { return height_; }
+	inline DXGI_FORMAT getFormat()const { return surfaceformat_; }
+	inline float* getClearColorPtr() { return clearcolor; }
 };
 

@@ -4,6 +4,7 @@
 class Game :public SceneBase
 {
 private:
+	float factor_;
 public:
 	bool init();
 	SceneBase* update();

@@ -171,6 +171,7 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	);
 	ThrowIfFailed(hr);
 	swapchain_ = std::make_shared<SwapChain>(swapchain, heaprtv_);
+	surfaceformat_ = swapchain_->getFormat();
 
 	//Alt+Enterを無効にする
 	hr = factory->MakeWindowAssociation(Hwnd, DXGI_MWA_NO_ALT_ENTER);
@@ -205,6 +206,12 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 	scissorrect_.left = 0;
 	scissorrect_.right = static_cast<LONG>(width_);
 	scissorrect_.bottom = static_cast<LONG>(height_);
+
+	//デフォルトの背景色を決定
+	clearcolor[0] = kClearColor[0];
+	clearcolor[1] = kClearColor[1];
+	clearcolor[2] = kClearColor[2];
+	clearcolor[3] = kClearColor[3];
 }
 
 void Direct3D::render()
@@ -222,7 +229,7 @@ void Direct3D::render()
 	auto dsv = defaultdepthdsv_;
 
 	//レンダーターゲットクリア
-	cmdlist_->ClearRenderTargetView(rtv, kClearColor, 0, nullptr);
+	cmdlist_->ClearRenderTargetView(rtv, clearcolor, 0, nullptr);
 
 	//深度バッファクリア
 	cmdlist_->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,1.0F,0,0,nullptr);

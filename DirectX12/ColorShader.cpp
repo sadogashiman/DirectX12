@@ -102,8 +102,6 @@ void ColorShader::init()
 	pipelinestatedesc.PS.pShaderBytecode = pixel.data;
 	pipelinestatedesc.PS.BytecodeLength = pixel.size;
 
-
-
 	//ブレンドステートのセット
 	pipelinestatedesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 

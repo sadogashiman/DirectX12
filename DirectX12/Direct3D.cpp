@@ -21,7 +21,7 @@ void Direct3D::init(const int ScreenWidth, const int ScreenHeight, const bool Vs
 {
 	UINT dxgidebugflag = 0;
 
-#ifdef false
+#ifdef TRUE
 	//デバッグ時のみデバッグレイヤーを有効化する
 	//デバイスの作成後に有効にすると意味がないのでデバイスの作成前に設定する
 	ComPtr<ID3D12Debug>debugcontroller;

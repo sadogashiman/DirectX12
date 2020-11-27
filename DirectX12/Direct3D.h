@@ -29,7 +29,6 @@ private:
 	ComPtr<ID3D12CommandAllocator> bundlecmdallocator_;
 	ComPtr<ID3D12GraphicsCommandList> cmdlist_;				//レンダリング用のコマンドリストのカプセル化
 	ComPtr<ID3D12Resource1> depthbuffer_;
-
 	
 	CD3DX12_VIEWPORT viewport_;								//ビューポート
 	CD3DX12_RECT scissorrect_;
@@ -62,7 +61,6 @@ private:
 	float clearcolor[4];
 
 	void waitPrevFrame();
-	void waitForIdleGPU();
 
 	//create
 	void createCommandAllocators();
@@ -77,6 +75,7 @@ public:
 	void render();
 	void destroy();
 	void finishCommandList(ComPtr<ID3D12GraphicsCommandList>& Command);
+	void waitForIdleGPU();
 
 	//window関係
 	void ToggleFullscreen();

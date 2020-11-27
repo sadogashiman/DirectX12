@@ -62,8 +62,8 @@ void HDRShader::initModel()
 	auto frameindex = d3d_->getFrameIndex();
 	auto cmdallocator = d3d_->getCommandAllocatorVector();
 
-	void* mapped;
-	HRESULT hr;
+	//void* mapped;
+	//HRESULT hr;
 	CD3DX12_RANGE range(0, 0);
 
 	cmdlist->Reset(cmdallocator[frameindex].Get(), nullptr);

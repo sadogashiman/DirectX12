@@ -235,7 +235,11 @@ void Direct3D::render()
 	cmdlist_->ClearDepthStencilView(dsv,D3D12_CLEAR_FLAG_DEPTH,1.0F,0,0,nullptr);
 
 	//描画先をセット
-	cmdlist_->OMSetRenderTargets(1, &(D3D12_CPU_DESCRIPTOR_HANDLE)rtv, FALSE, &(D3D12_CPU_DESCRIPTOR_HANDLE)dsv);
+	//cmdlist_->OMSetRenderTargets(1, &(D3D12_CPU_DESCRIPTOR_HANDLE)rtv, FALSE, &(D3D12_CPU_DESCRIPTOR_HANDLE)dsv);
+	D3D12_CPU_DESCRIPTOR_HANDLE handlertvs[] = { rtv };
+	D3D12_CPU_DESCRIPTOR_HANDLE handledsv = dsv;
+	cmdlist_->OMSetRenderTargets(1, handlertvs, FALSE, &handledsv);
+
 
 	ID3D12DescriptorHeap* heaps[] = { heap_->GetHeap().Get() };
 	cmdlist_->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -366,8 +370,9 @@ ComPtr<ID3D12Resource1> Direct3D::createResource(const CD3DX12_RESOURCE_DESC& De
 {
 	HRESULT hr;
 	ComPtr<ID3D12Resource1> ret;
+	const auto heapprops = CD3DX12_HEAP_PROPERTIES(HeapType);
 	hr = device_->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(HeapType),
+		&heapprops,
 		D3D12_HEAP_FLAG_NONE,
 		&Desc,
 		ResourceStates,
@@ -479,6 +484,8 @@ void Direct3D::prepareDescriptorHeaps()
 
 void Direct3D::createDefaultDepthBuffer(const int Width, const int Height)
 {
+	HRESULT hr;
+
 	// デプスバッファの生成
 	auto depthbufferdesc = CD3DX12_RESOURCE_DESC::Tex2D(
 		DXGI_FORMAT_D32_FLOAT,
@@ -493,9 +500,9 @@ void Direct3D::createDefaultDepthBuffer(const int Width, const int Height)
 	depthclearvalue.DepthStencil.Depth = 1.0f;
 	depthclearvalue.DepthStencil.Stencil = 0;
 
-	HRESULT hr;
+	const auto heapprops = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	hr = device_->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		&heapprops,
 		D3D12_HEAP_FLAG_NONE,
 		&depthbufferdesc,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,

@@ -88,8 +88,13 @@ void HDRShader::renderModel()
 	cmdlist->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0F, 0, 0, nullptr);
 
 	//描画先をセット
-	cmdlist->OMSetRenderTargets(1, &(D3D12_CPU_DESCRIPTOR_HANDLE)rtv, FALSE, &(D3D12_CPU_DESCRIPTOR_HANDLE)dsv);
-	
+	//cmdlist->OMSetRenderTargets(1, &(D3D12_CPU_DESCRIPTOR_HANDLE)rtv, FALSE, &(D3D12_CPU_DESCRIPTOR_HANDLE)dsv);
+	D3D12_CPU_DESCRIPTOR_HANDLE handlertvs[] = { rtv };
+	D3D12_CPU_DESCRIPTOR_HANDLE handledsv = dsv;
+
+	cmdlist->OMSetRenderTargets(1, handlertvs, FALSE, &handledsv);
+
+
 	//ビューポートとシザーのセット
 	auto viewport = CD3DX12_VIEWPORT(0.0F, 0.0F, float(d3d_->getWidth()), float(d3d_->getHeight()));
 	auto scissorrect = CD3DX12_RECT(0, 0, LONG(d3d_->getWidth()), LONG(d3d_->getHeight()));

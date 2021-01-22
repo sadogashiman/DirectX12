@@ -181,7 +181,7 @@ bool Game::init()
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hcpu(descriptor);
 	CD3DX12_GPU_DESCRIPTOR_HANDLE hgpu(descriptor);
 
-	imgui_helper::PrepareImGui(Singleton<System>::getPtr()->getWindowHandle(), Singleton<Direct3D>::getPtr()->getDevice(), Singleton<Direct3D>::getPtr()->getFormat(), kBufferCount, hcpu, hgpu);
+	//imgui_helper::PrepareImGui(Singleton<System>::getPtr()->getWindowHandle(), Singleton<Direct3D>::getPtr()->getDevice(), Singleton<Direct3D>::getPtr()->getFormat(), kBufferCount, hcpu, hgpu);
 
 	SAFE_DELETE(vertexshader.data);
 	SAFE_DELETE(pixelshader.data);
@@ -192,7 +192,7 @@ bool Game::init()
 SceneBase* Game::update()
 {
 	//ImGui更新
-	updateImGui();
+	//updateImGui();
 
 
 	return this;
@@ -228,7 +228,11 @@ bool Game::render()
 	d3d->getCommandList()->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0F, 0, 0, nullptr);
 
 	//描画先セット
-	d3d->getCommandList()->OMSetRenderTargets(1, &(D3D12_CPU_DESCRIPTOR_HANDLE)rtv, FALSE, &(D3D12_CPU_DESCRIPTOR_HANDLE)dsv);
+	//d3d->getCommandList()->OMSetRenderTargets(1, &(D3D12_CPU_DESCRIPTOR_HANDLE)rtv, FALSE, &(D3D12_CPU_DESCRIPTOR_HANDLE)dsv);
+	D3D12_CPU_DESCRIPTOR_HANDLE handlertvs[] = { rtv };
+	D3D12_CPU_DESCRIPTOR_HANDLE handledsv = dsv;
+	d3d->getCommandList()->OMSetRenderTargets(1, handlertvs, FALSE, &handledsv);
+
 
 	auto viewport = CD3DX12_VIEWPORT(0.0F, 0.0F, float(kScreenWidth), float(kScreenHeight));
 	auto scissorrect = CD3DX12_RECT(0, 0, LONG(kScreenWidth), LONG(kScreenHeight));
@@ -261,7 +265,7 @@ bool Game::render()
 	d3d->getCommandList()->DrawIndexedInstanced(model_.indexCount, instancingdatacount_, 0, 0, 0);
 
 	//ImGui描画
-	renderImGui(d3d);
+	//renderImGui(d3d);
 
 	//レンダーターゲットからスワップチェイン表示可能へ
 	auto barriertopresent = swapchain->getBarrierToPresent();
@@ -281,20 +285,21 @@ bool Game::render()
 
 void Game::destroy()
 {
-	ImGui_ImplWin32_Shutdown();
-	ImGui_ImplDX12_Shutdown();
-	imgui_helper::CleanupImGui();
+	//ImGui_ImplWin32_Shutdown();
+	//ImGui_ImplDX12_Shutdown();
+	//imgui_helper::CleanupImGui();
 }
 
 ComPtr<ID3D12Resource1> Game::createBufferResource(D3D12_HEAP_TYPE Type, UINT BufferSize, D3D12_RESOURCE_STATES State)
 {
 	ComPtr<ID3D12Resource1> ret;
 	HRESULT hr;
-
+	const auto heapprops = CD3DX12_HEAP_PROPERTIES(Type);
+	const auto resourcedesc = CD3DX12_RESOURCE_DESC::Buffer(BufferSize);
 	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(Type),
+		&heapprops,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(BufferSize),
+		&resourcedesc,
 		State,
 		nullptr,
 		IID_PPV_ARGS(&ret)

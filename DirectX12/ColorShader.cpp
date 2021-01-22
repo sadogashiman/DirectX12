@@ -148,6 +148,8 @@ void ColorShader::destroy()
 
 void ColorShader::makeCommand()
 {
+	auto viewport = Singleton<Direct3D>::getPtr()->getViewport();
+	auto scissorrect = Singleton<Direct3D>::getPtr()->getScissorRects();
 	//パイプラインステートのセット
 	Singleton<Direct3D>::getPtr()->getCommandList()->SetPipelineState(pipeline_.Get());
 
@@ -155,8 +157,8 @@ void ColorShader::makeCommand()
 	Singleton<Direct3D>::getPtr()->getCommandList()->SetGraphicsRootSignature(rootsignature_.Get());
 
 	//ビューポートとシザーのセット
-	Singleton<Direct3D>::getPtr()->getCommandList()->RSSetViewports(1, &Singleton<Direct3D>::getPtr()->getViewport());
-	Singleton<Direct3D>::getPtr()->getCommandList()->RSSetScissorRects(1, &Singleton<Direct3D>::getPtr()->getScissorRects());
+	Singleton<Direct3D>::getPtr()->getCommandList()->RSSetViewports(1, &viewport);
+	Singleton<Direct3D>::getPtr()->getCommandList()->RSSetScissorRects(1, &scissorrect);
 
 	//プリミティブタイプのセット
 	Singleton<Direct3D>::getPtr()->getCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -173,10 +175,12 @@ ComPtr<ID3D12Resource1> ColorShader::createBuffer(unsigned int BufferSize, const
 {
 	HRESULT hr;
 	ComPtr<ID3D12Resource1> buffer;
+	const auto heapprops = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+	const auto resourcedesc = CD3DX12_RESOURCE_DESC::Buffer(BufferSize);
 	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		&heapprops,
 		D3D12_HEAP_FLAG_NONE,
-		&CD3DX12_RESOURCE_DESC::Buffer(BufferSize),
+		&resourcedesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
 		IID_PPV_ARGS(&buffer)

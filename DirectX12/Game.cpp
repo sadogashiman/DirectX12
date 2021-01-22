@@ -7,8 +7,8 @@
 #include "imgui.h"
 #include "examples\imgui_impl_dx12.h"
 #include "examples\imgui_impl_win32.h"
-#include "TeapotModel.h"
 #include "Support.h"
+#include "TeapotModel.h"
 
 static XMFLOAT4 colorset[] = {
 	 XMFLOAT4(1.0F,1.0F,1.0F,1.0F),

@@ -4,11 +4,12 @@
 //******************************
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN //使われていないAPIの一部を除外するマクロ
+#if _MSC_VER > 1922 && !defined(_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING)
+#define _SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING //VST基本ライブラリのコンパイルエラー回避マクロ
+#endif
 #ifdef _DEBUG
 #define D3DCOMPILE_DEBUG 1
 #endif // _DEBUG
-
-
 
 //******************************
 //　　		include

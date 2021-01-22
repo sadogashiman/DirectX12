@@ -2,6 +2,9 @@
 #include "HDRShader.h"
 #include "Singleton.h"
 #include "SwapChain.h"
+#include "TeapotModel.h"
+#include "Direct3D.h"
+#include "Support.h"
 
 HDRShader::HDRShader()
 {
@@ -62,11 +65,133 @@ void HDRShader::initModel()
 	auto frameindex = d3d_->getFrameIndex();
 	auto cmdallocator = d3d_->getCommandAllocatorVector();
 
-	//void* mapped;
-	//HRESULT hr;
+	void* mapped;
+	HRESULT hr;
 	CD3DX12_RANGE range(0, 0);
 
+	//コマンドリスト初期化
 	cmdlist->Reset(cmdallocator[frameindex].Get(), nullptr);
+
+	UINT buffersize = sizeof(TeapotModel::TeapotVerticesPN);
+	auto vbdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
+
+	//バッファを設定
+	model_.resourceVB = d3d_->createResource(vbdesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_HEAP_TYPE_DEFAULT);
+	auto uploadvb = d3d_->createResource(vbdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
+
+	hr = uploadvb->Map(0, nullptr, &mapped);
+	if (SUCCEEDED(hr))
+	{
+		memcpy(mapped, TeapotModel::TeapotVerticesPN, buffersize);
+		uploadvb->Unmap(0, nullptr);
+	}
+
+	model_.vbView.BufferLocation = model_.resourceVB->GetGPUVirtualAddress();
+	model_.vbView.SizeInBytes = buffersize;
+	model_.vbView.StrideInBytes = sizeof(TeapotModel::Vertex);
+
+	d3d_->getCommandList()->CopyResource(model_.resourceVB.Get(), uploadvb.Get());
+
+	buffersize = sizeof(TeapotModel::TeapotIndices);
+	auto ibdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
+
+	model_.resourceIB = d3d_->createResource(ibdesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_HEAP_TYPE_DEFAULT);
+	auto uploadIB = d3d_->createResource(ibdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
+
+	hr = uploadIB->Map(0, nullptr, &mapped);
+	if (SUCCEEDED(hr))
+	{
+		memcpy(mapped, TeapotModel::TeapotIndices, buffersize);
+		uploadIB->Unmap(0, nullptr);
+	}
+
+	model_.ibView.BufferLocation = model_.resourceIB->GetGPUVirtualAddress();
+	model_.ibView.SizeInBytes = buffersize;
+	model_.ibView.Format = DXGI_FORMAT_R32_UINT;
+	model_.indexCount = _countof(TeapotModel::TeapotIndices);
+
+	d3d_->getCommandList()->CopyResource(model_.resourceVB.Get(), uploadvb.Get());
+
+	//コピー処理が終わったので各バッファの状態を変更
+	auto barriervb = CD3DX12_RESOURCE_BARRIER::Transition(
+		model_.resourceVB.Get(), 
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+
+	auto barrierib = CD3DX12_RESOURCE_BARRIER::Transition(
+		model_.resourceIB.Get(),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		D3D12_RESOURCE_STATE_INDEX_BUFFER
+	);
+
+	D3D12_RESOURCE_BARRIER barriers[] = { barriervb,barrierib };
+
+	d3d_->getCommandList()->ResourceBarrier(_countof(barriers), barriers);
+
+	d3d_->getCommandList()->Close();
+
+	ID3D12CommandList* command[] = { d3d_->getCommandList().Get() };
+	d3d_->getCommandQueue()->ExecuteCommandLists(1, command);
+
+	d3d_->waitForIdleGPU();
+
+
+	ComPtr<ID3DBlob> errblob, vs, ps;
+	hr = Support::createShaderV6(L"HDR_vs.hlsl", L"vs_6_0", vs, errblob);
+	ThrowIfFailed(hr);
+	hr = Support::createShaderV6(L"HDR_ps.hlsl", L"ps_6_0", ps, errblob);
+	ThrowIfFailed(hr);
+
+	//ルートシグネチャ構築
+	CD3DX12_ROOT_PARAMETER rootparams[1];
+	rootparams[0].InitAsConstantBufferView(0);
+	CD3DX12_ROOT_SIGNATURE_DESC rootsigdesc{};
+	rootsigdesc.Init(
+		_countof(rootparams),
+		rootparams,
+		0,
+		nullptr,
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT
+	);
+
+	ComPtr<ID3DBlob> signature;
+	hr = D3D12SerializeRootSignature(&rootsigdesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &signature, &errblob);
+	ThrowIfFailed(hr);
+
+	hr = d3d_->getDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&model_.rootSig));
+	ThrowIfFailed(hr);
+
+	//インプットレイアウト
+	D3D12_INPUT_ELEMENT_DESC inputelementdesc[] = {
+		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,offsetof(TeapotModel::Vertex,Position),D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA},
+		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,offsetof(TeapotModel::Vertex,Normal),D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA}
+	};
+
+	auto surfaceformat = swapchain->getFormat();
+
+	//パイプラインステート
+	auto psodesc = book_util::CreateDefaultPsoDesc(
+		surfaceformat,
+		vs,
+		ps,
+		book_util::CreateTeapotModelRasterizerDesc(),
+		inputelementdesc,
+		_countof(inputelementdesc),
+		model_.rootSig
+	);
+	hr = d3d_->getDevice()->CreateGraphicsPipelineState(&psodesc, IID_PPV_ARGS(&model_.pipeline));
+	ThrowIfFailed(hr);
+
+	//定数バッファの作成
+	buffersize = sizeof(SceneParameter);
+	buffersize = book_util::RoundupConstantBufferSize(buffersize);
+	auto cbdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
+	for (auto& cb : d3d_->createConstantBuffers(cbdesc))
+	{
+		model_.sceneCB.push_back(cb);
+	}
+
+
 
 
 }

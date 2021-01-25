@@ -3,6 +3,7 @@
 #include "Singleton.h"
 #include "Direct3D.h"
 #include "DXHelper.h"
+#include "Support.h"
 
 ColorShader::ColorShader()
 {
@@ -15,8 +16,7 @@ ColorShader::~ColorShader()
 void ColorShader::init()
 {
 	HRESULT hr;
-	ShaderData pixel;
-	ShaderData vertex;
+	ComPtr<ID3D10Blob> vs, ps;
 	Vertex vertices[] = {
 	{ {  0.0f, 0.25f, 0.5f }, { 1.0f, 0.0f,0.0f,1.0f} },
 	{ { 0.25f,-0.25f, 0.5f }, { 0.0f, 1.0f,0.0f,1.0f} },
@@ -26,8 +26,8 @@ void ColorShader::init()
 	uint32_t indices[] = { 0,1,2 };
 
 	//頂点バッファとインデックスバッファの作成
-	vertexbuffer_ = createBuffer(sizeof(vertices), vertices);
-	indexbuffer_ = createBuffer(sizeof(indices), indices);
+	vertexbuffer_ = Support::createBuffer(sizeof(vertices), vertices);
+	indexbuffer_ = Support::createBuffer(sizeof(indices), indices);
 	indexcount_ = _countof(indices);
 
 	//頂点バッファビューとインデックスバッファビューの作成
@@ -39,11 +39,16 @@ void ColorShader::init()
 	indexbufferview_.Format = DXGI_FORMAT_R32_UINT;
 
 	//シェーダーコンパイル
-	ReadDataFromFile(L"color_ps.cso", &pixel.data, &pixel.size);
-	ReadDataFromFile(L"color_vs.cso", &vertex.data, &vertex.size);
+	//ReadDataFromFile(L"color_ps.cso", &pixel.data, &pixel.size);
+	//ReadDataFromFile(L"color_vs.cso", &vertex.data, &vertex.size);
+
+	ComPtr<ID3D10Blob> errblob;
+	hr = Support::createShaderV6("Resource/Shader/color_vs.hlsl", L"vs_6_0", vs, errblob);
+	ThrowIfFailed(hr);
+	hr = Support::createShaderV6("Resource/Shader/color_ps.hlsl", L"ps_6_0", ps, errblob);
+	ThrowIfFailed(hr);
 
 	//ルートシグネチャの構築
-	ComPtr<ID3D10Blob> errblob;
 	CD3DX12_ROOT_SIGNATURE_DESC rootsigdesc{};
 	rootsigdesc.Init(
 		0,
@@ -73,23 +78,28 @@ void ColorShader::init()
 	}
 
 	//インプットレイアウト
-	D3D12_INPUT_ELEMENT_DESC inputelementdesc[2];
-	inputelementdesc[0].SemanticName = "POSITION";
-	inputelementdesc[0].SemanticIndex = 0;
-	inputelementdesc[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-	inputelementdesc[0].InputSlot = 0;
-	inputelementdesc[0].AlignedByteOffset = offsetof(Vertex,position);
-	inputelementdesc[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-	inputelementdesc[0].InstanceDataStepRate = 0;
+	//D3D12_INPUT_ELEMENT_DESC inputelementdesc[2];
+	//inputelementdesc[0].SemanticName = "POSITION";
+	//inputelementdesc[0].SemanticIndex = 0;
+	//inputelementdesc[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	//inputelementdesc[0].InputSlot = 0;
+	//inputelementdesc[0].AlignedByteOffset = offsetof(Vertex,position);
+	//inputelementdesc[0].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+	//inputelementdesc[0].InstanceDataStepRate = 0;
 
-	inputelementdesc[1].SemanticName = "COLOR";
-	inputelementdesc[1].SemanticIndex = 0;
-	inputelementdesc[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	inputelementdesc[1].InputSlot = 0;
-	inputelementdesc[1].AlignedByteOffset = offsetof(Vertex, color);
-	inputelementdesc[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
-	inputelementdesc[1].InstanceDataStepRate = 0;
+	//inputelementdesc[1].SemanticName = "COLOR";
+	//inputelementdesc[1].SemanticIndex = 0;
+	//inputelementdesc[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	//inputelementdesc[1].InputSlot = 0;
+	//inputelementdesc[1].AlignedByteOffset = offsetof(Vertex, color);
+	//inputelementdesc[1].InputSlotClass = D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA;
+	//inputelementdesc[1].InstanceDataStepRate = 0;
 
+
+	D3D12_INPUT_ELEMENT_DESC inputelementdesc[] = {
+  { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, offsetof(Vertex, position), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA},
+  { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT,0, offsetof(Vertex,color), D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA},
+	};
 	//パイプラインの生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC pipelinestatedesc{};
 
@@ -97,10 +107,8 @@ void ColorShader::init()
 	pipelinestatedesc.pRootSignature = rootsignature_.Get();
 
 	//シェーダーのセット
-	pipelinestatedesc.VS.pShaderBytecode = vertex.data;
-	pipelinestatedesc.VS.BytecodeLength = vertex.size;
-	pipelinestatedesc.PS.pShaderBytecode = pixel.data;
-	pipelinestatedesc.PS.BytecodeLength = pixel.size;
+	pipelinestatedesc.VS = CD3DX12_SHADER_BYTECODE(vs.Get());
+	pipelinestatedesc.PS = CD3DX12_SHADER_BYTECODE(ps.Get());
 
 	//ブレンドステートのセット
 	pipelinestatedesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
@@ -126,14 +134,11 @@ void ColorShader::init()
 	pipelinestatedesc.SampleMask = UINT_MAX; //これを忘れると描画されない
 
 	//レンダリングパイプラインの作成
-	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateGraphicsPipelineState(&pipelinestatedesc, IID_PPV_ARGS(pipeline_.GetAddressOf()));
+	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateGraphicsPipelineState(&pipelinestatedesc, IID_PPV_ARGS(&pipeline_));
 	if (FAILED(hr))
 	{
 		throw std::runtime_error("CreateGraphicsPipelineState faild.");
 	}
-
-	SAFE_DELETE(vertex.data);
-	SAFE_DELETE(pixel.data);
 }
 
 void ColorShader::destroy()
@@ -169,35 +174,4 @@ void ColorShader::makeCommand()
 
 	//描画(インスタンシング描画)
 	Singleton<Direct3D>::getPtr()->getCommandList()->DrawIndexedInstanced(indexcount_, 1, 0, 0, 0);
-}
-
-ComPtr<ID3D12Resource1> ColorShader::createBuffer(unsigned int BufferSize, const void* InitialData)
-{
-	HRESULT hr;
-	ComPtr<ID3D12Resource1> buffer;
-	const auto heapprops = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
-	const auto resourcedesc = CD3DX12_RESOURCE_DESC::Buffer(BufferSize);
-	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateCommittedResource(
-		&heapprops,
-		D3D12_HEAP_FLAG_NONE,
-		&resourcedesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr,
-		IID_PPV_ARGS(&buffer)
-	);
-
-	//初期データの指定がある場合コピー
-	if (SUCCEEDED(hr) && InitialData != nullptr)
-	{
-		void* mapped;
-		CD3DX12_RANGE range(0, 0);
-		hr = buffer->Map(0, &range, &mapped);
-		if (SUCCEEDED(hr))
-		{
-			memcpy(mapped, InitialData, BufferSize);
-			buffer->Unmap(0, nullptr);
-		}
-	}
-
-	return buffer;
 }

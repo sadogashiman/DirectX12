@@ -21,7 +21,7 @@ public:
 	static HRESULT createShaderV6(std::filesystem::path ShaderPath, std::wstring Profile, ComPtr<ID3DBlob>& ShaderBlob, ComPtr<ID3DBlob>& ErrorMessage);
 	static HRESULT createShaderForCSOFile(std::filesystem::path ShaderPath, ShaderData** ShaderData);
 	static HRESULT createShader(std::filesystem::path ShdaerPath, const wchar_t* Profile, ComPtr<ID3D10Blob>& ShaderBlob, ComPtr<ID3D10Blob>& ErrorMessage);
-	
+	static ComPtr<ID3D12Resource1> createBuffer(unsigned int Buffersize, const void* InitialData, D3D12_HEAP_TYPE Heaptype = D3D12_HEAP_TYPE_UPLOAD,D3D12_RESOURCE_STATES ResourceState = D3D12_RESOURCE_STATE_GENERIC_READ);
 	//create
 	
 	//get

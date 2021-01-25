@@ -2,7 +2,6 @@
 #include "HDRShader.h"
 #include "Singleton.h"
 #include "SwapChain.h"
-#include "TeapotModel.h"
 #include "Direct3D.h"
 #include "Support.h"
 
@@ -69,48 +68,45 @@ void HDRShader::initModel()
 	HRESULT hr;
 	CD3DX12_RANGE range(0, 0);
 
-	//コマンドリスト初期化
-	cmdlist->Reset(cmdallocator[frameindex].Get(), nullptr);
+	//UINT buffersize = sizeof(TeapotModel::TeapotVerticesPN);
+	//auto vbdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
 
-	UINT buffersize = sizeof(TeapotModel::TeapotVerticesPN);
-	auto vbdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
+	////バッファを設定
+	//model_.resourceVB = d3d_->createResource(vbdesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_HEAP_TYPE_DEFAULT);
+	//auto uploadvb = d3d_->createResource(vbdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
 
-	//バッファを設定
-	model_.resourceVB = d3d_->createResource(vbdesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_HEAP_TYPE_DEFAULT);
-	auto uploadvb = d3d_->createResource(vbdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
+	//hr = uploadvb->Map(0, nullptr, &mapped);
+	//if (SUCCEEDED(hr))
+	//{
+	//	memcpy(mapped, TeapotModel::TeapotVerticesPN, buffersize);
+	//	uploadvb->Unmap(0, nullptr);
+	//}
 
-	hr = uploadvb->Map(0, nullptr, &mapped);
-	if (SUCCEEDED(hr))
-	{
-		memcpy(mapped, TeapotModel::TeapotVerticesPN, buffersize);
-		uploadvb->Unmap(0, nullptr);
-	}
+	//model_.vbView.BufferLocation = model_.resourceVB->GetGPUVirtualAddress();
+	//model_.vbView.SizeInBytes = buffersize;
+	//model_.vbView.StrideInBytes = sizeof(TeapotModel::Vertex);
 
-	model_.vbView.BufferLocation = model_.resourceVB->GetGPUVirtualAddress();
-	model_.vbView.SizeInBytes = buffersize;
-	model_.vbView.StrideInBytes = sizeof(TeapotModel::Vertex);
+	//d3d_->getCommandList()->CopyResource(model_.resourceVB.Get(), uploadvb.Get());
 
-	d3d_->getCommandList()->CopyResource(model_.resourceVB.Get(), uploadvb.Get());
+	//buffersize = sizeof(TeapotModel::TeapotIndices);
+	//auto ibdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
 
-	buffersize = sizeof(TeapotModel::TeapotIndices);
-	auto ibdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
+	//model_.resourceIB = d3d_->createResource(ibdesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_HEAP_TYPE_DEFAULT);
+	//auto uploadIB = d3d_->createResource(ibdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
 
-	model_.resourceIB = d3d_->createResource(ibdesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, D3D12_HEAP_TYPE_DEFAULT);
-	auto uploadIB = d3d_->createResource(ibdesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, D3D12_HEAP_TYPE_UPLOAD);
+	//hr = uploadIB->Map(0, nullptr, &mapped);
+	//if (SUCCEEDED(hr))
+	//{
+	//	memcpy(mapped, TeapotModel::TeapotIndices, buffersize);
+	//	uploadIB->Unmap(0, nullptr);
+	//}
 
-	hr = uploadIB->Map(0, nullptr, &mapped);
-	if (SUCCEEDED(hr))
-	{
-		memcpy(mapped, TeapotModel::TeapotIndices, buffersize);
-		uploadIB->Unmap(0, nullptr);
-	}
+	//model_.ibView.BufferLocation = model_.resourceIB->GetGPUVirtualAddress();
+	//model_.ibView.SizeInBytes = buffersize;
+	//model_.ibView.Format = DXGI_FORMAT_R32_UINT;
+	//model_.indexCount = _countof(TeapotModel::TeapotIndices);
 
-	model_.ibView.BufferLocation = model_.resourceIB->GetGPUVirtualAddress();
-	model_.ibView.SizeInBytes = buffersize;
-	model_.ibView.Format = DXGI_FORMAT_R32_UINT;
-	model_.indexCount = _countof(TeapotModel::TeapotIndices);
-
-	d3d_->getCommandList()->CopyResource(model_.resourceVB.Get(), uploadvb.Get());
+	//d3d_->getCommandList()->CopyResource(model_.resourceVB.Get(), uploadvb.Get());
 
 	//コピー処理が終わったので各バッファの状態を変更
 	auto barriervb = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -161,39 +157,31 @@ void HDRShader::initModel()
 	hr = d3d_->getDevice()->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&model_.rootSig));
 	ThrowIfFailed(hr);
 
-	//インプットレイアウト
-	D3D12_INPUT_ELEMENT_DESC inputelementdesc[] = {
-		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,offsetof(TeapotModel::Vertex,Position),D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA},
-		{"NORMAL",0,DXGI_FORMAT_R32G32B32_FLOAT,0,offsetof(TeapotModel::Vertex,Normal),D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA}
-	};
+
 
 	auto surfaceformat = swapchain->getFormat();
 
 	//パイプラインステート
-	auto psodesc = book_util::CreateDefaultPsoDesc(
-		surfaceformat,
-		vs,
-		ps,
-		book_util::CreateTeapotModelRasterizerDesc(),
-		inputelementdesc,
-		_countof(inputelementdesc),
-		model_.rootSig
-	);
-	hr = d3d_->getDevice()->CreateGraphicsPipelineState(&psodesc, IID_PPV_ARGS(&model_.pipeline));
-	ThrowIfFailed(hr);
+	//auto psodesc = book_util::CreateDefaultPsoDesc(
+	//	surfaceformat,
+	//	vs,
+	//	ps,
+	//	book_util::CreateTeapotModelRasterizerDesc(),
+	//	inputelementdesc,
+	//	_countof(inputelementdesc),
+	//	model_.rootSig
+	//);
+	//hr = d3d_->getDevice()->CreateGraphicsPipelineState(&psodesc, IID_PPV_ARGS(&model_.pipeline));
+	//ThrowIfFailed(hr);
 
-	//定数バッファの作成
-	buffersize = sizeof(SceneParameter);
-	buffersize = book_util::RoundupConstantBufferSize(buffersize);
-	auto cbdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
-	for (auto& cb : d3d_->createConstantBuffers(cbdesc))
-	{
-		model_.sceneCB.push_back(cb);
-	}
-
-
-
-
+	////定数バッファの作成
+	//buffersize = sizeof(SceneParameter);
+	//buffersize = book_util::RoundupConstantBufferSize(buffersize);
+	//auto cbdesc = CD3DX12_RESOURCE_DESC::Buffer(buffersize);
+	//for (auto& cb : d3d_->createConstantBuffers(cbdesc))
+	//{
+	//	model_.sceneCB.push_back(cb);
+	//}
 }
 
 void HDRShader::renderModel()
@@ -208,17 +196,12 @@ void HDRShader::renderModel()
 	auto rtv = swapchain->getCurrentRTV();
 	auto dsv = d3d_->getDefaultDepthDSV();
 
-	//クリア
-	cmdlist->ClearRenderTargetView(rtv, kClearColor, 0, nullptr);
-	cmdlist->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0F, 0, 0, nullptr);
-
 	//描画先をセット
 	//cmdlist->OMSetRenderTargets(1, &(D3D12_CPU_DESCRIPTOR_HANDLE)rtv, FALSE, &(D3D12_CPU_DESCRIPTOR_HANDLE)dsv);
 	D3D12_CPU_DESCRIPTOR_HANDLE handlertvs[] = { rtv };
 	D3D12_CPU_DESCRIPTOR_HANDLE handledsv = dsv;
 
 	cmdlist->OMSetRenderTargets(1, handlertvs, FALSE, &handledsv);
-
 
 	//ビューポートとシザーのセット
 	auto viewport = CD3DX12_VIEWPORT(0.0F, 0.0F, float(d3d_->getWidth()), float(d3d_->getHeight()));
@@ -256,5 +239,4 @@ void HDRShader::renderModel()
 	cmdlist->IASetIndexBuffer(&model_.ibView);
 	cmdlist->SetGraphicsRootConstantBufferView(0, model_.sceneCB[d3d_->getFrameIndex()]->GetGPUVirtualAddress());
 	cmdlist->DrawIndexedInstanced(model_.indexCount, 1, 0, 0, 0);
-
 }

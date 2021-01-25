@@ -71,7 +71,6 @@
     <ClInclude Include="lua_Helper.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelData.h" />
-    <ClInclude Include="Resource\TeapotModel.h" />
     <ClInclude Include="SceneBase.h" />
     <ClInclude Include="Span.h" />
     <ClInclude Include="Support.h" />
@@ -81,7 +80,6 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SwapChain.h" />
     <ClInclude Include="System.h" />
-    <ClInclude Include="TeapotModel.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -89,6 +87,18 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="DXRShader\Common.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="DXRShader\Hit.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="DXRShader\Miss.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="DXRShader\RayGen.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="instancing_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
@@ -107,11 +117,13 @@
     </FxCompile>
     <FxCompile Include="Resource\Shader\color_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.4</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Resource\Shader\color_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.4</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">6.0</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <FxCompile Include="Resource\Shader\model_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>

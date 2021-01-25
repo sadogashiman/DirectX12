@@ -19,7 +19,6 @@ private:
 
 	unsigned int indexcount_;
 
-	ComPtr<ID3D12Resource1>createBuffer(unsigned int BufferSize, const void* InitialData);
 public:
 	ColorShader();
 	~ColorShader();

@@ -88,6 +88,9 @@
     <Filter Include="リソース ファイル\HLSL\Instacing">
       <UniqueIdentifier>{cdc39caa-a7f1-4b3e-a434-1d5569f4320a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="リソース ファイル\HLSL\DXR">
+      <UniqueIdentifier>{ed06cc3a-80ab-4b0c-ab3d-5a8ce7f02933}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -224,9 +227,6 @@
     <ClInclude Include="SwapChain.h">
       <Filter>DirectX\SwapChain</Filter>
     </ClInclude>
-    <ClInclude Include="Resource\TeapotModel.h">
-      <Filter>Support\Microsoft</Filter>
-    </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -266,9 +266,6 @@
     <ClInclude Include="Loader.h">
       <Filter>Loader</Filter>
     </ClInclude>
-    <ClInclude Include="TeapotModel.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="ModelData.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -297,6 +294,18 @@
     </FxCompile>
     <FxCompile Include="instancing_ps.hlsl">
       <Filter>リソース ファイル\HLSL\Instacing</Filter>
+    </FxCompile>
+    <FxCompile Include="DXRShader\Common.hlsl">
+      <Filter>リソース ファイル\HLSL\DXR</Filter>
+    </FxCompile>
+    <FxCompile Include="DXRShader\Hit.hlsl">
+      <Filter>リソース ファイル\HLSL\DXR</Filter>
+    </FxCompile>
+    <FxCompile Include="DXRShader\Miss.hlsl">
+      <Filter>リソース ファイル\HLSL\DXR</Filter>
+    </FxCompile>
+    <FxCompile Include="DXRShader\RayGen.hlsl">
+      <Filter>リソース ファイル\HLSL\DXR</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -19,8 +19,8 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	//if (FAILED(Singleton<Direct3D>::getPtr()->getDevice()->CheckFeatureSupport(D3D12_FEATURE_SHADER_MODEL, &shadermodel, sizeof(shadermodel)))
 	//	||(shadermodel.HighestShaderModel<D3D_SHADER_MODEL_6_5))
 	//{
-	//	OutputDebugString("ERROR: Shader Model 6.5 is not supported\n");
-	//	//throw std::exception("Shader Model 6.5 not Supported");
+	//	OutputDebugString("ERROR: <GPU> Shader Model 6.5 is not supported\n");
+	//	//throw std::exception(" <GPU> Shader Model 6.5 not Supported");
 	//}
 
 	////Meshシェーダーをサポートしているかチェック
@@ -28,8 +28,8 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 	//if (FAILED(Singleton<Direct3D>::getPtr()->getDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS7, &features, sizeof(features)))
 	//	|| (features.MeshShaderTier == D3D12_MESH_SHADER_TIER_NOT_SUPPORTED))
 	//{
-	//	OutputDebugStringA("ERROR: Mesh Shaders aren't supported!\n");
-	//	//throw std::exception("Mesh Shaders aren't supported!");
+	//	OutputDebugStringA("ERROR: <GPU> Mesh Shaders aren't supported!\n");
+	//	//throw std::exception(" <GPU> Mesh Shaders aren't supported!");
 	//}
 
 	//パスが有効か確認
@@ -80,8 +80,11 @@ HRESULT Support::createShaderV6(std::filesystem::path ShaderPath, std::wstring P
 #endif // _DEBUG
 	};
 
-	compiler->Compile(source.Get(), ShaderPath.wstring().c_str(), L"main", Profile.c_str(), compileflag, _countof(compileflag), nullptr, 0, nullptr, &dxcresult);
-
+	hr = compiler->Compile(source.Get(), ShaderPath.wstring().c_str(), L"main", Profile.c_str(), compileflag, _countof(compileflag), nullptr, 0, nullptr, &dxcresult);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
 	dxcresult->GetStatus(&hr);
 	if (SUCCEEDED(hr))
 	{
@@ -132,6 +135,38 @@ HRESULT Support::createShader(std::filesystem::path ShaderPath, const wchar_t* P
 	}
 
 	return hr;
+}
+
+ComPtr<ID3D12Resource1> Support::createBuffer(unsigned int Buffersize, const void* InitialData, D3D12_HEAP_TYPE Heaptype, D3D12_RESOURCE_STATES ResourceState)
+{
+	HRESULT hr;
+	ComPtr<ID3D12Resource1> buffer;
+	const auto heapprops = CD3DX12_HEAP_PROPERTIES(Heaptype);
+	const auto resourcedesc = CD3DX12_RESOURCE_DESC::Buffer(Buffersize);
+
+	hr = Singleton<Direct3D>::getPtr()->getDevice()->CreateCommittedResource(
+		&heapprops,
+		D3D12_HEAP_FLAG_NONE,
+		&resourcedesc,
+		ResourceState,
+		nullptr,
+		IID_PPV_ARGS(&buffer)
+	);
+
+	//初期データの指定がある場合コピー
+	if (SUCCEEDED(hr)&&InitialData!=nullptr)
+	{
+		void* mapped;
+		CD3DX12_RANGE range(0, 0);
+		hr = buffer->Map(0, &range, &mapped);
+		if (SUCCEEDED(hr))
+		{
+			memcpy(mapped, InitialData, Buffersize);
+			buffer->Unmap(0, nullptr);
+		}
+	}
+
+	return buffer;
 }
 
 _Use_decl_annotations_

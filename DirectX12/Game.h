@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneBase.h"
+#include "ColorShader.h"
 const UINT kInstanceDataMax = 200;
 
 class Game :public SceneBase
@@ -42,6 +43,8 @@ private:
 	ComPtr<ID3D12Resource1> createBufferResource(D3D12_HEAP_TYPE Type, UINT BufferSize, D3D12_RESOURCE_STATES State);
 	void updateImGui();
 	void renderImGui(Direct3D* Direct3D);
+
+	std::unique_ptr<ColorShader> colorshader_;
 public:
 	bool init();
 	SceneBase* update();
